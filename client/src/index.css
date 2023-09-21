@@ -1,0 +1,79 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  @apply box-border;
+}
+
+body {
+  @apply text-[#222];
+}
+
+img {
+  @apply max-w-full;
+}
+
+main {
+  @apply p-3 max-w-[700px] my-0 mx-auto;
+}
+
+header {
+  @apply flex justify-between mb-12 items-center mt-5;
+}
+
+header a {
+  @apply decoration-transparent text-inherit;
+}
+
+.logo {
+  @apply font-bold text-3xl;
+}
+
+header nav {
+  @apply flex gap-4;
+}
+
+.post {
+  display: grid;
+  grid-template-columns: 0.9fr 1.1fr;
+  gap: 20px;
+  @apply mb-8;
+}
+
+.post .text h2 {
+  @apply m-0 text-3xl;
+}
+
+.post .info {
+  @apply my-2 mx-0 text-[#888] text-sm font-bold flex gap-3;
+}
+
+.post .author {
+  @apply text-[#333];
+}
+
+.post .summary {
+  @apply my-2 mx-0 px-3;
+}
+
+.login,
+.register {
+  @apply max-w-[400px] my-0 mx-auto;
+}
+
+.dark {
+  @apply bg-gray-900 text-white min-h-full;
+}
+
+.theme {
+  @apply transition-all delay-100 ease-in;
+}
+
+input {
+  @apply block mb-1 w-full px-1 py-2  border-2 border-solid border-gray-700 rounded-lg bg-white;
+}
+
+button {
+  @apply w-full block bg-gray-800 text-white border-2 py-2 px-0;
+}
