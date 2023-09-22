@@ -13,6 +13,7 @@ const LoginPage = () => {
 
   async function login(e) {
     e.preventDefault();
+
     const response = await fetch("http://localhost:4000/login", {
       method: "POST",
       body: JSON.stringify({ username, password }),
@@ -21,6 +22,7 @@ const LoginPage = () => {
       },
       credentials: "include",
     });
+
     if (response.ok) {
       response.json().then((userInfo) => {
         setUserInfo(userInfo);

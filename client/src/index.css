@@ -77,3 +77,11 @@ input {
 button {
   @apply w-full block bg-gray-800 text-white border-2 py-2 px-0;
 }
+
+.post-page .image {
+  @apply max-h-[200px] w-screen flex overflow-hidden;
+}
+
+.post-page .image img {
+  @apply object-cover object-center;
+}
