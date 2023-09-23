@@ -1,38 +1,54 @@
-import React, { useState } from "react";
-import "react-quill/dist/quill.snow.css";
-import { useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import Editor from "../components/Editor";
 
-const CreatePost = () => {
+const EditPage = () => {
+  const { id } = useParams();
+
   const [title, setTitle] = useState("");
   const [summary, setSummary] = useState("");
   const [content, setContent] = useState("");
   const [files, setFiles] = useState("");
 
+  const [cover, setCover] = useState("");
+
   const navigate = useNavigate();
 
-  async function createNewPost(e) {
+  useEffect(() => {
+    fetch(`http://localhost:4000/post/${id}`)
+      .then((res) => res.json())
+      .then((data) => {
+        setTitle(data.title);
+        setContent(data.content);
+        setSummary(data.summary);
+      });
+  }, []);
+
+  async function updatePost(e) {
+    e.preventDefault();
+
     const data = new FormData();
     data.set("title", title);
     data.set("summary", summary);
     data.set("content", content);
-    data.set("file", files[0]);
+    data.set("id", id);
+    if (files?.[0]) {
+      data.set("file", files?.[0]);
+    }
 
-    e.preventDefault();
-
-    const response = await fetch("http://localhost:4000/post", {
-      method: "POST",
+    const response = await fetch(`http://localhost:4000/post`, {
+      method: "PUT",
       body: data,
       credentials: "include",
     });
 
     if (response.ok) {
-      navigate("/");
+      navigate(`/post/${id}`);
     }
   }
 
   return (
-    <form onSubmit={createNewPost}>
+    <form onSubmit={updatePost}>
       <input
         type="title"
         placeholder="Title"
@@ -47,9 +63,9 @@ const CreatePost = () => {
       />
       <input type="file" onChange={(e) => setFiles(e.target.files)} />
       <Editor onChange={setContent} value={content} />
-      <button className="mt-2"> Create Post</button>
+      <button className="mt-2"> Update Post</button>
     </form>
   );
 };
 
-export default CreatePost;
+export default EditPage;

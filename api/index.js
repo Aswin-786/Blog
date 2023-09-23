@@ -13,9 +13,16 @@ const jwt = require('jsonwebtoken')
 const cookieParser = require('cookie-parser')
 
 const multer = require('multer')
-const uploadMiddleware = multer({ dest: 'uploads/' })
+const uploadMiddleware = multer({
+  dest: 'uploads/',
+  limits: {
+    fieldSize: 10 * 1024 * 1024, // Increase field size limit to 10MB or adjust as needed
+  },
+});
 
-const fs = require('fs')
+
+const fs = require('fs');
+const { log } = require('console');
 
 
 
@@ -122,5 +129,70 @@ app.get(`/post/:id`, async (req, res) => {
   const postDoc = await Post.findById(id).populate('author', ['username'])
   res.json(postDoc)
 })
+
+app.put(`/post`, uploadMiddleware.single('file'), async (req, res) => {
+
+  let newPath = null
+  if (req.file) {
+    const { originalname, path } = req.file
+    const ext = originalname.split('.')[1]
+
+    newPath = path + '.' + ext
+    fs.renameSync(path, newPath)
+  }
+
+
+  const { token } = req.cookies;
+
+  jwt.verify(token, SECRET, {}, async (err, info) => {
+    if (err) throw err
+    const { id, title, summary, content } = req.body
+    const postDoc = await Post.findById(id)
+
+    const isAuthor = JSON.stringify(postDoc.author) === JSON.stringify(info.id)
+
+    if (!isAuthor) {
+      return res.status(400).json('you are not the router')
+
+    }
+
+    // await postDoc.update({
+    //   title,
+    //   summary,
+    //   content,
+    //   cover: newPath ? newPath : postDoc.cover
+    // })
+    await Post.updateOne(
+      { _id: id, author: info.id }, // Specify the document to update based on its _id and author
+      {
+        $set: {
+          title,
+          summary,
+          content,
+          cover: newPath ? newPath : postDoc.cover
+        }
+      }
+    );
+    res.json(postDoc)
+
+  })
+
+})
+
+app.delete(`/post/:id`, async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const postDoc = await Post.deleteOne({ _id: id })
+    if (!postDoc) {
+      return res.status(404).json({ error: 'Post not found' });
+    }
+    res.json({ message: 'Post deleted successfully' });
+  } catch (error) {
+
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 
 app.listen(4000)

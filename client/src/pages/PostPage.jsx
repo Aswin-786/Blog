@@ -1,6 +1,6 @@
 import { formatISO9075 } from "date-fns";
 import React, { useContext, useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { UserContext } from "../context/userContext";
 
 const PostPage = () => {
@@ -9,6 +9,8 @@ const PostPage = () => {
 
   const { userInfo } = useContext(UserContext);
 
+  const navigate = useNavigate();
+
   useEffect(() => {
     fetch(`http://localhost:4000/post/${id}`)
       .then((res) => res.json())
@@ -16,6 +18,15 @@ const PostPage = () => {
   }, []);
 
   if (!postInfo) return "";
+
+  const deleteItem = async () => {
+    const res = await fetch(`http://localhost:4000/post/${id}`, {
+      method: "DELETE",
+    });
+    if (res.ok) {
+      navigate("/");
+    }
+  };
 
   return (
     <div className="post-page">
@@ -27,6 +38,7 @@ const PostPage = () => {
           <Link to={`/edit/${postInfo._id}`} alt="" className="edit-button">
             Edit this Post
           </Link>
+          <button onClick={deleteItem}>Delete Post</button>
         </div>
       )}
       <div className="image">
