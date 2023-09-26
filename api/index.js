@@ -22,13 +22,13 @@ const uploadMiddleware = multer({
 
 
 const fs = require('fs');
-const { log } = require('console');
+// const { log } = require('console');
 
 
 
 
 app.use(express.json());
-app.use(cors({ credentials: true, origin: 'http://localhost:3000' }))
+app.use(cors({ credentials: true, origin: 'http://localhost:3002' }))
 app.use(cookieParser())
 
 app.use('/uploads', express.static(__dirname + '/uploads'))
@@ -136,14 +136,11 @@ app.put(`/post`, uploadMiddleware.single('file'), async (req, res) => {
   if (req.file) {
     const { originalname, path } = req.file
     const ext = originalname.split('.')[1]
-
     newPath = path + '.' + ext
     fs.renameSync(path, newPath)
   }
 
-
   const { token } = req.cookies;
-
   jwt.verify(token, SECRET, {}, async (err, info) => {
     if (err) throw err
     const { id, title, summary, content } = req.body
@@ -156,12 +153,6 @@ app.put(`/post`, uploadMiddleware.single('file'), async (req, res) => {
 
     }
 
-    // await postDoc.update({
-    //   title,
-    //   summary,
-    //   content,
-    //   cover: newPath ? newPath : postDoc.cover
-    // })
     await Post.updateOne(
       { _id: id, author: info.id }, // Specify the document to update based on its _id and author
       {
@@ -174,9 +165,7 @@ app.put(`/post`, uploadMiddleware.single('file'), async (req, res) => {
       }
     );
     res.json(postDoc)
-
   })
-
 })
 
 app.delete(`/post/:id`, async (req, res) => {

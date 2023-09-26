@@ -5,7 +5,6 @@ import { UserContext } from "../context/userContext";
 const LoginPage = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [redirect, setRedirect] = useState(false);
 
   const { setUserInfo } = useContext(UserContext);
 
@@ -26,8 +25,7 @@ const LoginPage = () => {
     if (response.ok) {
       response.json().then((userInfo) => {
         setUserInfo(userInfo);
-        // setRedirect(true);
-        navigate("/"); // Redirect to the homepage
+        navigate("/");
       });
     } else {
       alert("wrong credentials");
