@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import "react-quill/dist/quill.snow.css";
 import { useNavigate } from "react-router-dom";
 import Editor from "../components/Editor";
+import axios from "axios";
 
 const CreatePost = () => {
   const [title, setTitle] = useState("");
@@ -12,22 +13,27 @@ const CreatePost = () => {
   const navigate = useNavigate();
 
   async function createNewPost(e) {
-    const data = new FormData();
-    data.set("title", title);
-    data.set("summary", summary);
-    data.set("content", content);
-    data.set("file", files[0]);
-
     e.preventDefault();
 
-    const response = await fetch("http://localhost:4000/post", {
-      method: "POST",
-      body: data,
-      credentials: "include",
-    });
+    const data = new FormData();
+    data.append("title", title);
+    data.append("summary", summary);
+    data.append("content", content);
+    data.append("file", files[0]);
 
-    if (response.ok) {
-      navigate("/");
+    try {
+      const response = await axios.post("http://localhost:4000/post", data, {
+        withCredentials: true,
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      if (response.status === 200) {
+        navigate("/");
+      }
+    } catch (error) {
+      console.error("Error creating a new post:", error);
     }
   }
 

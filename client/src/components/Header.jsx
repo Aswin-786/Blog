@@ -2,22 +2,22 @@ import React, { useContext, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { UserContext } from "../context/userContext";
 import DarkModeToggle from "./DarkModeToggle";
+import axios from "axios";
 
 const Header = () => {
   const { setUserInfo, userInfo } = useContext(UserContext);
 
   useEffect(() => {
-    fetch("http://localhost:4000/profile", {
-      credentials: "include",
-    })
-      .then((response) => response.json())
-      .then((data) => setUserInfo(data));
+    axios
+      .get("http://localhost:4000/profile", {
+        withCredentials: true,
+      })
+      .then((response) => setUserInfo(response.data));
   }, []);
 
   function logout() {
-    fetch("http://localhost:4000/logout", {
-      credentials: "include",
-      method: "POST",
+    axios.post("http://localhost:4000/logout", {
+      withCredentials: true,
     });
     setUserInfo(null);
   }

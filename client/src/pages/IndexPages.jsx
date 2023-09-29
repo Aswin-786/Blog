@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from "react";
 import Post from "../components/Post";
+import axios from "axios";
 
 const IndexPages = () => {
   const [post, setPost] = useState([]);
   useEffect(() => {
-    fetch("http://localhost:4000/post")
-      .then((res) => res.json())
-      .then((data) => setPost(data));
+    axios.get("http://localhost:4000/post").then((res) => setPost(res.data));
   }, []);
 
   return (

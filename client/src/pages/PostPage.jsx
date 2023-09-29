@@ -2,6 +2,7 @@ import { formatISO9075 } from "date-fns";
 import React, { useContext, useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { UserContext } from "../context/userContext";
+import axios from "axios";
 
 const PostPage = () => {
   const { id } = useParams();
@@ -10,18 +11,16 @@ const PostPage = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch(`http://localhost:4000/post/${id}`)
-      .then((res) => res.json())
-      .then((data) => setPostInfo(data));
+    axios
+      .get(`http://localhost:4000/post/${id}`)
+      .then((res) => setPostInfo(res.data));
   }, []);
 
   if (!postInfo) return "";
 
   const deleteItem = async () => {
-    const res = await fetch(`http://localhost:4000/post/${id}`, {
-      method: "DELETE",
-    });
-    if (res.ok) {
+    const res = await axios.delete(`http://localhost:4000/post/${id}`, {});
+    if (res.status === 200) {
       navigate("/");
     }
   };

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Editor from "../components/Editor";
+import axios from "axios";
 
 const EditPage = () => {
   const { id } = useParams();
@@ -15,13 +16,11 @@ const EditPage = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch(`http://localhost:4000/post/${id}`)
-      .then((res) => res.json())
-      .then((data) => {
-        setTitle(data.title);
-        setContent(data.content);
-        setSummary(data.summary);
-      });
+    axios.get(`http://localhost:4000/post/${id}`).then((res) => {
+      setTitle(res.data.title);
+      setContent(res.data.content);
+      setSummary(res.data.summary);
+    });
   }, []);
 
   async function updatePost(e) {
@@ -36,13 +35,11 @@ const EditPage = () => {
       data.set("file", files?.[0]);
     }
 
-    const response = await fetch(`http://localhost:4000/post`, {
-      method: "PUT",
-      body: data,
-      credentials: "include",
+    const response = await axios.put(`http://localhost:4000/post`, data, {
+      withCredentials: true,
     });
 
-    if (response.ok) {
+    if (response.status === 200) {
       navigate(`/post/${id}`);
     }
   }

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import axios from "axios";
 
 const RegisterPage = () => {
   const [username, setUsername] = useState("");
@@ -6,17 +7,28 @@ const RegisterPage = () => {
 
   async function register(e) {
     e.preventDefault();
-    const response = await fetch("http://localhost:4000/register", {
-      method: "POST",
-      body: JSON.stringify({ username, password }),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    if (response.status === 200) {
-      alert("registration successfull");
-    } else {
-      alert("registration failed");
+
+    try {
+      const response = await axios.post(
+        "http://localhost:4000/register",
+        {
+          username,
+          password,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        alert("Registration successful");
+      } else {
+        alert("Registration failed");
+      }
+    } catch (error) {
+      console.error("Error during registration:", error);
     }
   }
   return (

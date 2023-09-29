@@ -1,34 +1,41 @@
 import React, { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { UserContext } from "../context/userContext";
+import axios from "axios";
 
 const LoginPage = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-
   const { setUserInfo } = useContext(UserContext);
-
   const navigate = useNavigate();
 
   async function login(e) {
     e.preventDefault();
 
-    const response = await fetch("http://localhost:4000/login", {
-      method: "POST",
-      body: JSON.stringify({ username, password }),
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-    });
+    try {
+      const response = await axios.post(
+        "http://localhost:4000/login",
+        {
+          username,
+          password,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          withCredentials: true,
+        }
+      );
 
-    if (response.ok) {
-      response.json().then((userInfo) => {
+      if (response.status === 200) {
+        const userInfo = response.data;
         setUserInfo(userInfo);
         navigate("/");
-      });
-    } else {
-      alert("wrong credentials");
+      } else {
+        alert("Wrong credentials");
+      }
+    } catch (error) {
+      console.error("Error during login:", error);
     }
   }
   return (
