@@ -12,16 +12,20 @@ const Post = require('./models/Post')
 const jwt = require('jsonwebtoken')
 const cookieParser = require('cookie-parser')
 
-const multer = require('multer')
-const uploadMiddleware = multer({
-  dest: 'uploads/',
-  limits: {
-    fieldSize: 10 * 1024 * 1024, // Increase field size limit to 10MB or adjust as needed
-  },
-});
+const { uploadMiddleware } = require('./middleware/fileUpload')
+const { fs } = require('./middleware/fileUpload')
+
+// const multer = require('multer')
+// const uploadMiddleware = multer({
+//   dest: 'uploads/',
+//   limits: {
+//     fieldSize: 10 * 1024 * 1024, // Increase field size limit to 10MB or adjust as needed
+//   },
+// });
 
 
-const fs = require('fs');
+// const fs = require('fs');
+// const { log } = require('util');
 // const { log } = require('console');
 
 
@@ -53,23 +57,25 @@ app.post('/register', async (req, res) => {
   }
 })
 
-
-
 app.post('/login', async (req, res) => {
   const { username, password } = req.body
+  console.log(req.body);
   const userDoc = await User.findOne({ username })
-  const passOk = bcrypt.compareSync(password, userDoc.password)
-  if (passOk) {
-    jwt.sign({ username, id: userDoc._id }, SECRET, {}, (err, token) => {
-      if (err) throw err;
-      res.cookie('token', token).json({
-        id: userDoc._id,
-        username
+  if (userDoc) {
+    const passOk = bcrypt.compareSync(password, userDoc.password)
+    if (passOk) {
+      jwt.sign({ username, id: userDoc._id }, SECRET, {}, (err, token) => {
+        if (err) throw err;
+        res.cookie('token', token).json({
+          id: userDoc._id,
+          username
+        })
       })
-    })
-
+    } else {
+      res.status(404).json({ message: 'wrong credentials' })
+    }
   } else {
-    res.status(404).json({ message: 'wrong credentials' })
+    res.status(401).json({ message: 'wronng user name provided' })
   }
 
 })
@@ -89,18 +95,14 @@ app.post('/logout', (req, res) => {
 })
 
 app.post('/post', uploadMiddleware.single('file'), async (req, res) => {
-
   // console.log(req.file);
   const { originalname, path } = req.file
   const ext = originalname.split('.')[1]
-
   const newPath = path + '.' + ext
   fs.renameSync(path, newPath)
-
   const { token } = req.cookies
   jwt.verify(token, SECRET, {}, async (err, info) => {
     if (err) throw err
-
     const { title, summary, content } = req.body
     const postDoc = await Post.create({
       title,
@@ -109,7 +111,6 @@ app.post('/post', uploadMiddleware.single('file'), async (req, res) => {
       cover: newPath,
       author: info.id
     })
-
     res.json(postDoc)
   })
 })
@@ -150,7 +151,6 @@ app.put(`/post`, uploadMiddleware.single('file'), async (req, res) => {
 
     if (!isAuthor) {
       return res.status(400).json('you are not the router')
-
     }
 
     await Post.updateOne(
@@ -170,7 +170,6 @@ app.put(`/post`, uploadMiddleware.single('file'), async (req, res) => {
 
 app.delete(`/post/:id`, async (req, res) => {
   const { id } = req.params;
-
   try {
     const postDoc = await Post.deleteOne({ _id: id })
     if (!postDoc) {
@@ -178,7 +177,6 @@ app.delete(`/post/:id`, async (req, res) => {
     }
     res.json({ message: 'Post deleted successfully' });
   } catch (error) {
-
     res.status(500).json({ error: 'Internal server error' });
   }
 });

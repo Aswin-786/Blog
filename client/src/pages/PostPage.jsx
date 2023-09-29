@@ -6,9 +6,7 @@ import { UserContext } from "../context/userContext";
 const PostPage = () => {
   const { id } = useParams();
   const [postInfo, setPostInfo] = useState("");
-
   const { userInfo } = useContext(UserContext);
-
   const navigate = useNavigate();
 
   useEffect(() => {
