@@ -1,4 +1,4 @@
-import Layout from "./Layout";
+import Layout from "./pages/Layout";
 import { Route, Routes } from "react-router-dom";
 import IndexPages from "./pages/IndexPages";
 import LoginPage from "./pages/LoginPage";
@@ -6,9 +6,8 @@ import RegisterPage from "./pages/RegisterPage";
 import { UserContextProvider } from "./context/userContext";
 import { ThemeContextProvider } from "./context/ThemeContext";
 import { lazy, Suspense } from 'react';
-// import CreatePost from "./pages/CreatePost";
-// import PostPage from "./pages/PostPage";
-// import EditPage from "./pages/EditPage";
+import UserDetails from "./pages/UserDetails";
+import Loading from "./components/Loading";
 const EditPage = lazy(() => import('./pages/EditPage'))
 const CreatePost = lazy(() => import('./pages/CreatePost'))
 const PostPage = lazy(() => import('./pages/PostPage'))
@@ -17,7 +16,7 @@ function App() {
   return (
     <UserContextProvider>
       <ThemeContextProvider>
-        <Suspense fallback={<div className="container">Loading...</div>}>
+        <Suspense fallback={<Loading />}>
           <Routes>
             <Route path="/" element={<Layout />}>
               <Route index element={<IndexPages />} />
@@ -26,6 +25,7 @@ function App() {
               <Route path={"/create"} element={<CreatePost />} />
               <Route path={"/post/:id"} element={<PostPage />} />
               <Route path={"/edit/:id"} element={<EditPage />} />
+              <Route path={"/user/:userId"} element={<UserDetails />} />
             </Route>
           </Routes>
         </Suspense>
