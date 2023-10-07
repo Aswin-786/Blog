@@ -7,11 +7,11 @@
 }
 
 body {
-  @apply text-[#222];
+  @apply text-[#222] h-full overflow-x-hidden;
 }
 
 img {
-  @apply max-w-full;
+  /* @apply max-w-full; */
 }
 
 main {
@@ -38,23 +38,23 @@ header nav {
   display: grid;
   grid-template-columns: 0.9fr 1.1fr;
   gap: 20px;
-  @apply mb-8;
+  @apply mb-8 bg-neutral-50 rounded-md;
 }
 
 .post .text h2 {
-  @apply m-0 text-3xl;
+  @apply m-0 md:text-3xl text-2xl font-mono;
 }
 
 .post .info {
-  @apply my-2 mx-0 text-[#888] text-sm font-bold flex gap-3;
+  @apply my-2 mx-0 text-[#888] text-sm font-medium flex gap-3 items-center;
 }
 
 .post .author {
-  @apply text-[#333];
+  @apply text-[#333] bg-gray-200 p-1 rounded-xl;
 }
 
 .post .summary {
-  @apply my-2 mx-0 px-3;
+  @apply my-2 mx-0;
 }
 
 .login,
@@ -62,9 +62,12 @@ header nav {
   @apply max-w-[400px] my-0 mx-auto;
 }
 
-.dark {
-  @apply bg-gray-900 text-white min-h-full;
+/* .dark {
+  @apply bg-stone-700 text-white min-h-full;
 }
+.light {
+  @apply bg-white text-black;
+} */
 
 .theme {
   @apply transition-all delay-100 ease-in;
@@ -75,13 +78,31 @@ input {
 }
 
 button {
-  @apply w-full block bg-gray-800 text-white border-2 py-2 px-0;
+  @apply w-full block bg-stone-800 text-white border-2 py-2 px-0 outline-none border-none hover:opacity-80 rounded-md;
 }
 
 .post-page .image {
-  @apply max-h-[200px] w-screen flex overflow-hidden;
+  @apply h-[200px] w-full flex overflow-hidden;
 }
 
 .post-page .image img {
-  @apply object-cover object-center;
+  @apply object-contain object-center h-[200px] rounded-tl-md;
+}
+
+.loader {
+  border: 16px solid #f3f3f3;
+  border-top: 16px solid black;
+  border-radius: 50%;
+  width: 120px;
+  height: 120px;
+  animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
