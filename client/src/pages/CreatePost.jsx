@@ -14,13 +14,11 @@ const CreatePost = () => {
 
   async function createNewPost(e) {
     e.preventDefault();
-
     const data = new FormData();
     data.append("title", title);
     data.append("summary", summary);
     data.append("content", content);
     data.append("file", files[0]);
-
     try {
       const response = await axios.post("http://localhost:4000/post", data, {
         withCredentials: true,
@@ -38,7 +36,7 @@ const CreatePost = () => {
   }
 
   return (
-    <form onSubmit={createNewPost}>
+    <form onSubmit={createNewPost} className="flex flex-col gap-5 mt-32">
       <input
         type="title"
         placeholder="Title"
