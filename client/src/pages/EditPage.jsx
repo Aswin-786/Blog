@@ -5,27 +5,28 @@ import axios from "axios";
 
 const EditPage = () => {
   const { id } = useParams();
-
   const [title, setTitle] = useState("");
   const [summary, setSummary] = useState("");
   const [content, setContent] = useState("");
   const [files, setFiles] = useState("");
-
-  const [cover, setCover] = useState("");
-
   const navigate = useNavigate();
 
   useEffect(() => {
-    axios.get(`http://localhost:4000/post/${id}`).then((res) => {
-      setTitle(res.data.title);
-      setContent(res.data.content);
-      setSummary(res.data.summary);
-    });
+    const editPost = async () => {
+      try {
+        const res = await axios.get(`http://localhost:4000/post/${id}`);
+        if (res.status === 200) {
+          setTitle(res.data.title);
+          setContent(res.data.content);
+          setSummary(res.data.summary);
+        }
+      } catch (error) {}
+    };
+    editPost();
   }, []);
 
   async function updatePost(e) {
     e.preventDefault();
-
     const data = new FormData();
     data.set("title", title);
     data.set("summary", summary);
@@ -38,7 +39,6 @@ const EditPage = () => {
     const response = await axios.put(`http://localhost:4000/post`, data, {
       withCredentials: true,
     });
-
     if (response.status === 200) {
       navigate(`/post/${id}`);
     }
