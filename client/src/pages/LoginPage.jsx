@@ -1,14 +1,16 @@
-import React, { useContext, useState } from "react";
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { UserContext } from "../context/userContext";
 import TextField from "@mui/material/TextField";
 import axios from "axios";
+import { userState } from "../store/atoms/User";
+import { useSetRecoilState } from "recoil";
 
 const LoginPage = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const { setUserInfo } = useContext(UserContext);
   const navigate = useNavigate();
+
+  const setUser = useSetRecoilState(userState);
 
   async function login(e) {
     e.preventDefault();
@@ -26,10 +28,12 @@ const LoginPage = () => {
           withCredentials: true,
         }
       );
-
       if (response.status === 200) {
-        const userInfo = response.data;
-        setUserInfo(userInfo);
+        setUser({
+          isLoading: false,
+          userName: response.data.username,
+          userId: response.data.id,
+        });
         navigate("/");
       } else {
         alert("Wrong credentials");
