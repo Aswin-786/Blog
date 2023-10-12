@@ -1,27 +1,16 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { UserContext } from "../context/userContext";
 import axios from "axios";
+import { useRecoilValue, useSetRecoilState } from "recoil";
+import { userEmailState, userIdState } from "../store/selectors/userDetails";
+import { userState } from "../store/atoms/User";
 
 const Header = () => {
-  const { setUserInfo, userInfo } = useContext(UserContext);
   const navigate = useNavigate();
   const [toggle, setToggle] = useState(false);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    const checkProfile = async () => {
-      try {
-        const res = await axios.get("http://localhost:4000/profile", {
-          withCredentials: true,
-        });
-        if (res.status === 200) {
-          setUserInfo(res.data);
-        }
-      } catch (error) {}
-    };
-    checkProfile();
-  }, []);
+  const userName = useRecoilValue(userEmailState);
+  const setUser = useSetRecoilState(userState);
+  const userId = useRecoilValue(userIdState);
 
   async function logout() {
     try {
@@ -29,13 +18,16 @@ const Header = () => {
         withCredentials: true,
       });
       if (res.status === 200) {
-        setUserInfo(null);
+        document.cookie =
+          "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        setUser({
+          isLoading: false,
+          userName: null,
+        });
         navigate("/login");
       }
     } catch (error) {}
   }
-
-  const username = userInfo?.username;
 
   return (
     <header className="md:flex md:flex-row md:items-center md:justify-between flex flex-col items-start ">
@@ -95,7 +87,7 @@ const Header = () => {
         >
           Home
         </Link>
-        {username && (
+        {userName && (
           <>
             <Link
               to="/create"
@@ -105,10 +97,10 @@ const Header = () => {
             </Link>
             <div className="cursor-pointer flex flex-col gap-3 md:flex-row">
               <Link
-                to={`/user/${userInfo.id}`}
+                to={`/user/${userId}`}
                 className="font-semibold border-b-2 border-transparent transition-all delay-100 pb-1 moveBorder hover:border-b-2 hover:border-black"
               >
-                {username}
+                {userName}
               </Link>{" "}
               <div
                 onClick={logout}
@@ -119,7 +111,7 @@ const Header = () => {
             </div>
           </>
         )}
-        {!username && (
+        {!userName && (
           <>
             <Link
               to="/login"
