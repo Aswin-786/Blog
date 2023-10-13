@@ -1,12 +1,13 @@
 import axios from "axios";
-import React, { useContext, useEffect } from "react";
+import React, { useEffect } from "react";
 import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { UserContext } from "../context/userContext";
+import { useRecoilValue } from "recoil";
+import { userIdState } from "../store/selectors/userDetails";
 
 const UserDetails = () => {
   const [user, setUser] = useState(null);
-  const { userInfo } = useContext(UserContext);
+  const userIds = useRecoilValue(userIdState);
   const { userId } = useParams();
   const navigate = useNavigate();
 
@@ -78,7 +79,7 @@ const UserDetails = () => {
                   </div>
                 </Link>
               </div>
-              {user?.userDoc?._id === userInfo.id && (
+              {user?.userDoc?._id === userIds && (
                 <div
                   className="mr-3 hover:opacity-80"
                   onClick={() => deltePost(item._id)}

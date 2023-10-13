@@ -3,7 +3,6 @@ import { Route, Routes } from "react-router-dom";
 import IndexPages from "./pages/IndexPages";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
-import { UserContextProvider } from "./context/userContext";
 import { lazy, Suspense } from 'react';
 import UserDetails from "./pages/UserDetails";
 import Loading from "./components/Loading";
