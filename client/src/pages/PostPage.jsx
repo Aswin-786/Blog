@@ -1,16 +1,17 @@
 import { formatISO9075 } from "date-fns";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { UserContext } from "../context/userContext";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import axios from "axios";
 import { Button } from "@mui/material";
+import { useRecoilValue } from "recoil";
+import { userIdState } from "../store/selectors/userDetails";
 
 const PostPage = () => {
   const { id } = useParams();
   const [postInfo, setPostInfo] = useState("");
-  const { userInfo } = useContext(UserContext);
+  const userId = useRecoilValue(userIdState);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -48,7 +49,7 @@ const PostPage = () => {
           {formatISO9075(new Date(postInfo.createdAt))}
         </time>
       </div>
-      {userInfo.id === postInfo.author._id && (
+      {userId === postInfo.author._id && (
         <div className=" flex items-center justify-between my-10">
           <Link to={`/edit/${postInfo._id}`} alt="" className="w-1/3">
             <Button variant="outlined" color="error" startIcon={<EditIcon />}>

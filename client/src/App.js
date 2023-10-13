@@ -15,24 +15,22 @@ const PostPage = lazy(() => import('./pages/PostPage'))
 
 function App() {
   return (
-    <UserContextProvider>
-      <RecoilRoot>
-        <Suspense fallback={<Loading />}>
-          <InitUser />
-          <Routes>
-            <Route path="/" element={<Layout />}>
-              <Route index element={<IndexPages />} />
-              <Route path={"/login"} element={<LoginPage />} />
-              <Route path={"/register"} element={<RegisterPage />} />
-              <Route path={"/create"} element={<CreatePost />} />
-              <Route path={"/post/:id"} element={<PostPage />} />
-              <Route path={"/edit/:id"} element={<EditPage />} />
-              <Route path={"/user/:userId"} element={<UserDetails />} />
-            </Route>
-          </Routes>
-        </Suspense>
-      </RecoilRoot>
-    </UserContextProvider>
+    <RecoilRoot>
+      <Suspense fallback={<Loading />}>
+        <InitUser />
+        <Routes>
+          <Route path="/" element={<Layout />}>
+            <Route index element={<IndexPages />} />
+            <Route path={"/login"} element={<LoginPage />} />
+            <Route path={"/register"} element={<RegisterPage />} />
+            <Route path={"/create"} element={<CreatePost />} />
+            <Route path={"/post/:id"} element={<PostPage />} />
+            <Route path={"/edit/:id"} element={<EditPage />} />
+            <Route path={"/user/:userId"} element={<UserDetails />} />
+          </Route>
+        </Routes>
+      </Suspense>
+    </RecoilRoot>
   );
 }
 
