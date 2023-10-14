@@ -31,7 +31,12 @@ const formats = [
   "image",
 ];
 
-const Editor = ({ value, onChange }) => {
+interface EditorProps {
+  value: string;
+  onChange: (value: string) => void;
+}
+
+const Editor: React.FC<EditorProps> = ({ value, onChange }) => {
   return (
     <ReactQuill
       theme="snow"

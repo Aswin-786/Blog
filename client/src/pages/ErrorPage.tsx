@@ -1,6 +1,6 @@
 import React from "react";
 
-const ErrorPage = () => {
+const ErrorPage: React.FC = () => {
   return (
     <div className="flex flex-col items-center gap-5 justify-center mt-52">
       <h1 className="md:text-8xl text-5xl font-extrabold ">404</h1>

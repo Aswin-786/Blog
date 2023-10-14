@@ -1,16 +1,16 @@
 import React, { useState } from "react";
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
 import { TextField } from "@mui/material";
 import { Link } from "react-router-dom";
 
-const RegisterPage = () => {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+const RegisterPage: React.FC = () => {
+  const [username, setUsername] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
 
-  async function register(e) {
+  async function register(e: React.FormEvent) {
     e.preventDefault();
     try {
-      const response = await axios.post(
+      const response: AxiosResponse = await axios.post(
         "http://localhost:4000/register",
         {
           username,

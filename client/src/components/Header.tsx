@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
 import { useRecoilValue, useSetRecoilState } from "recoil";
 import { userEmailState, userIdState } from "../store/selectors/userDetails";
 import { userState } from "../store/atoms/User";
 
-const Header = () => {
+const Header: React.FC = () => {
   const navigate = useNavigate();
   const [toggle, setToggle] = useState(false);
   const userName = useRecoilValue(userEmailState);
@@ -14,15 +14,19 @@ const Header = () => {
 
   async function logout() {
     try {
-      const res = await axios.post("http://localhost:4000/logout", {
-        withCredentials: true,
-      });
+      const res: AxiosResponse = await axios.post(
+        "http://localhost:4000/logout",
+        {
+          withCredentials: true,
+        }
+      );
       if (res.status === 200) {
         document.cookie =
           "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
         setUser({
           isLoading: false,
           userName: null,
+          userId: null,
         });
         navigate("/login");
       }
@@ -31,7 +35,7 @@ const Header = () => {
 
   return (
     <header className="md:flex md:flex-row md:items-center md:justify-between flex flex-col items-start ">
-      <Link to="/" alt="" className="logo">
+      <Link to="/" className="logo">
         <span
           onClick={() => setToggle(false)}
           className="md:w-5 md:h-5 w-3 h-3 text-white bg-black rounded-full md:px-5 md:py-2 px-3 py-0 hover:opacity-80"
@@ -50,7 +54,7 @@ const Header = () => {
             viewBox="0 0 24 24"
             stroke-width="1.5"
             stroke="currentColor"
-            class="w-6 h-6"
+            className="w-6 h-6"
           >
             <path
               stroke-linecap="round"

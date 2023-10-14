@@ -2,7 +2,27 @@ import React from "react";
 import { format } from "date-fns";
 import { Link } from "react-router-dom";
 
-const Post = ({ _id, title, summary, cover, content, createdAt, author }) => {
+interface PostProps {
+  _id: string;
+  title: string;
+  summary: string;
+  cover: string;
+  content: string;
+  createdAt: string;
+  author: {
+    username: string;
+  };
+}
+
+const Post: React.FC<PostProps> = ({
+  _id,
+  title,
+  summary,
+  cover,
+  content,
+  createdAt,
+  author,
+}) => {
   return (
     <Link to={`/post/${_id}`}>
       <div className="post">

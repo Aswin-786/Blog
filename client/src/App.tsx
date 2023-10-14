@@ -3,14 +3,15 @@ import { Route, Routes } from "react-router-dom";
 import IndexPages from "./pages/IndexPages";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense } from "react";
 import UserDetails from "./pages/UserDetails";
 import Loading from "./components/Loading";
 import { RecoilRoot } from "recoil";
 import InitUser from "./components/InitUser";
-const EditPage = lazy(() => import('./pages/EditPage'))
-const CreatePost = lazy(() => import('./pages/CreatePost'))
-const PostPage = lazy(() => import('./pages/PostPage'))
+import React from "react";
+const EditPage = lazy(() => import("./pages/EditPage"));
+const CreatePost = lazy(() => import("./pages/CreatePost"));
+const PostPage = lazy(() => import("./pages/PostPage"));
 
 function App() {
   return (

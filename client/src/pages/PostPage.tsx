@@ -3,21 +3,35 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
 import { Button } from "@mui/material";
 import { useRecoilValue } from "recoil";
 import { userIdState } from "../store/selectors/userDetails";
 
-const PostPage = () => {
-  const { id } = useParams();
-  const [postInfo, setPostInfo] = useState("");
+interface PostInfo {
+  _id: string;
+  title: string;
+  author: {
+    _id: string;
+    username: string;
+  };
+  createdAt: string;
+  cover: string;
+  content: string;
+}
+
+const PostPage: React.FC = () => {
+  const { id } = useParams<{ id?: string }>();
+  const [postInfo, setPostInfo] = useState<PostInfo | null>(null);
   const userId = useRecoilValue(userIdState);
   const navigate = useNavigate();
 
   useEffect(() => {
     const getPost = async () => {
       try {
-        const res = await axios.get(`http://localhost:4000/post/${id}`);
+        const res: AxiosResponse = await axios.get(
+          `http://localhost:4000/post/${id}`
+        );
         if (res.status === 200) {
           setPostInfo(res.data);
         }
@@ -26,10 +40,13 @@ const PostPage = () => {
     getPost();
   }, []);
 
-  if (!postInfo) return "";
+  if (!postInfo) return null;
 
   const deleteItem = async () => {
-    const res = await axios.delete(`http://localhost:4000/post/${id}`, {});
+    const res: AxiosResponse = await axios.delete(
+      `http://localhost:4000/post/${id}`,
+      {}
+    );
     if (res.status === 200) {
       navigate("/");
     }
@@ -51,7 +68,7 @@ const PostPage = () => {
       </div>
       {userId === postInfo.author._id && (
         <div className=" flex items-center justify-between my-10">
-          <Link to={`/edit/${postInfo._id}`} alt="" className="w-1/3">
+          <Link to={`/edit/${postInfo._id}`} className="w-1/3">
             <Button variant="outlined" color="error" startIcon={<EditIcon />}>
               Edit
             </Button>

@@ -5,10 +5,24 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { useRecoilValue } from "recoil";
 import { userIdState } from "../store/selectors/userDetails";
 
+interface PostInfo {
+  _id: string;
+  cover: string;
+  title: string;
+}
+
+interface UserInfo {
+  userDoc: {
+    _id: string;
+    username: string;
+  };
+  postDoc: PostInfo[];
+}
+
 const UserDetails = () => {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<UserInfo | null>(null);
   const userIds = useRecoilValue(userIdState);
-  const { userId } = useParams();
+  const { userId } = useParams<{ userId?: string }>();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -25,7 +39,7 @@ const UserDetails = () => {
     getUser();
   }, []);
 
-  async function deltePost(id) {
+  async function deltePost(id: string) {
     const res = await axios.delete(`http://localhost:4000/post/${id}`, {});
     if (res.status === 200) {
       navigate("/");
@@ -36,13 +50,12 @@ const UserDetails = () => {
     <div>
       <div className="flex flex-col items-center justify-center mb-4 bg-gray-200 py-4 rounded-md">
         <svg
-          className=""
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
           viewBox="0 0 24 24"
           stroke-width="1.5"
           stroke="currentColor"
-          class="w-16 h-16 md:w-24 md:h-24"
+          className="w-16 h-16 md:w-24 md:h-24"
         >
           <path
             stroke-linecap="round"
@@ -90,7 +103,7 @@ const UserDetails = () => {
                     viewBox="0 0 24 24"
                     stroke-width="1.5"
                     stroke="currentColor"
-                    class="w-6 h-6"
+                    className="w-6 h-6"
                   >
                     <path
                       stroke-linecap="round"

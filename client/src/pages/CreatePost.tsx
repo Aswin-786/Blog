@@ -4,21 +4,24 @@ import { useNavigate } from "react-router-dom";
 import Editor from "../components/Editor";
 import axios from "axios";
 
-const CreatePost = () => {
-  const [title, setTitle] = useState("");
-  const [summary, setSummary] = useState("");
-  const [content, setContent] = useState("");
-  const [files, setFiles] = useState("");
+const CreatePost: React.FC = () => {
+  const [title, setTitle] = useState<string>("");
+  const [summary, setSummary] = useState<string>("");
+  const [content, setContent] = useState<string>("");
+  const [files, setFiles] = useState<FileList | null>(null);
 
   const navigate = useNavigate();
 
-  async function createNewPost(e) {
+  async function createNewPost(e: React.FormEvent) {
     e.preventDefault();
     const data = new FormData();
     data.append("title", title);
     data.append("summary", summary);
     data.append("content", content);
-    data.append("file", files[0]);
+    if (files && files[0]) {
+      data.append("file", files[0]);
+    }
+
     try {
       await axios.post("http://localhost:4000/post", data, {
         withCredentials: true,
@@ -35,13 +38,13 @@ const CreatePost = () => {
   return (
     <form onSubmit={createNewPost} className="flex flex-col gap-5 mt-32">
       <input
-        type="title"
+        type="text"
         placeholder="Title"
         value={title}
         onChange={(e) => setTitle(e.target.value)}
       />
       <input
-        type="summary"
+        type="text"
         placeholder="Summary"
         value={summary}
         onChange={(e) => setSummary(e.target.value)}

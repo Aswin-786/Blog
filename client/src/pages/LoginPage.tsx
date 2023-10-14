@@ -5,14 +5,14 @@ import axios from "axios";
 import { userState } from "../store/atoms/User";
 import { useSetRecoilState } from "recoil";
 
-const LoginPage = () => {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+const LoginPage: React.FC = () => {
+  const [username, setUsername] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
   const navigate = useNavigate();
 
   const setUser = useSetRecoilState(userState);
 
-  async function login(e) {
+  async function login(e: React.FormEvent) {
     e.preventDefault();
     try {
       const response = await axios.post(

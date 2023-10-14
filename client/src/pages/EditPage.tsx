@@ -1,20 +1,22 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Editor from "../components/Editor";
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
 
-const EditPage = () => {
-  const { id } = useParams();
-  const [title, setTitle] = useState("");
-  const [summary, setSummary] = useState("");
-  const [content, setContent] = useState("");
-  const [files, setFiles] = useState("");
+const EditPage: React.FC = () => {
+  const { id } = useParams<{ id?: string }>();
+  const [title, setTitle] = useState<string>("");
+  const [summary, setSummary] = useState<string>("");
+  const [content, setContent] = useState<string>("");
+  const [files, setFiles] = useState<FileList | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
     const editPost = async () => {
       try {
-        const res = await axios.get(`http://localhost:4000/post/${id}`);
+        const res: AxiosResponse = await axios.get(
+          `http://localhost:4000/post/${id}`
+        );
         if (res.status === 200) {
           setTitle(res.data.title);
           setContent(res.data.content);
@@ -25,20 +27,26 @@ const EditPage = () => {
     editPost();
   }, []);
 
-  async function updatePost(e) {
+  async function updatePost(e: React.FormEvent) {
     e.preventDefault();
     const data = new FormData();
     data.set("title", title);
     data.set("summary", summary);
     data.set("content", content);
-    data.set("id", id);
+    if (id) {
+      data.set("id", id);
+    }
     if (files?.[0]) {
       data.set("file", files?.[0]);
     }
 
-    const response = await axios.put(`http://localhost:4000/post`, data, {
-      withCredentials: true,
-    });
+    const response: AxiosResponse = await axios.put(
+      `http://localhost:4000/post`,
+      data,
+      {
+        withCredentials: true,
+      }
+    );
     if (response.status === 200) {
       navigate(`/post/${id}`);
     }
@@ -47,13 +55,13 @@ const EditPage = () => {
   return (
     <form onSubmit={updatePost}>
       <input
-        type="title"
+        type="text"
         placeholder="Title"
         value={title}
         onChange={(e) => setTitle(e.target.value)}
       />
       <input
-        type="summary"
+        type="text"
         placeholder="Summary"
         value={summary}
         onChange={(e) => setSummary(e.target.value)}
