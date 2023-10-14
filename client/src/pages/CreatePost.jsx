@@ -20,16 +20,13 @@ const CreatePost = () => {
     data.append("content", content);
     data.append("file", files[0]);
     try {
-      const response = await axios.post("http://localhost:4000/post", data, {
+      await axios.post("http://localhost:4000/post", data, {
         withCredentials: true,
         headers: {
           "Content-Type": "multipart/form-data",
         },
       });
-
-      if (response.status === 200) {
-        navigate("/");
-      }
+      navigate("/");
     } catch (error) {
       console.error("Error creating a new post:", error);
     }
