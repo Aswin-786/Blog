@@ -1,5 +1,6 @@
 import express from "express";
 import dotenv from "dotenv";
+import path from "path";
 dotenv.config();
 const app = express();
 import cors from "cors";
@@ -11,10 +12,14 @@ import jwt from "jsonwebtoken";
 import cookieParser from "cookie-parser";
 import { uploadMiddleware } from "./middleware/fileUpload";
 import { fs } from "./middleware/fileUpload";
+
 app.use(express.json());
 app.use(cors({ credentials: true, origin: "http://localhost:3000" }));
 app.use(cookieParser());
-app.use("/uploads", express.static(__dirname + "/uploads"));
+
+const uploadsDirectory = path.join(__dirname, "../uploads");
+app.use("/uploads", express.static(uploadsDirectory));
+
 const salt = bcrypt.genSaltSync(10);
 const SECRET = "jdkshfaksjfkjads";
 const mongoUrl = process.env.MONGO;
@@ -157,11 +162,17 @@ app.put(`/post`, uploadMiddleware.single("file"), async (req, res) => {
         return res.status(403).json({ message: "error occurs in info" });
       const { id, title, summary, content }: PostDetails = req.body;
       const postDoc = await Post.findById(id);
-      if (!postDoc) return res.status(403);
+      if (!postDoc?.cover) return res.status(403);
       const isAuthor =
         JSON.stringify(postDoc.author) === JSON.stringify(info.id);
       if (!isAuthor) {
         return res.status(401).json("wrong author");
+      }
+      if (newPath) {
+        const imageLink = path.join(__dirname, "..", postDoc.cover);
+        fs.unlink(imageLink, (err) => {
+          if (err) console.log(err);
+        });
       }
       const updatedCover = newPath ? newPath : postDoc.cover;
       await Post.updateOne(
@@ -185,10 +196,16 @@ app.put(`/post`, uploadMiddleware.single("file"), async (req, res) => {
 app.delete(`/post/:id`, async (req, res) => {
   const { id } = req.params;
   try {
-    const postDoc = await Post.deleteOne({ _id: id });
-    if (!postDoc) {
+    const postDoc = await Post.findById(id);
+    if (!postDoc?.cover) {
       return res.status(404).json({ error: "Post not found" });
     }
+    const imageLink = path.join(__dirname, "..", postDoc.cover);
+    fs.unlink(imageLink, (err) => {
+      if (err) console.log(err);
+    });
+
+    await Post.deleteOne({ _id: id });
     res.json({ message: "Post deleted successfully" });
   } catch (error) {
     res.status(500).json({ error: "Internal server error" });

@@ -14,6 +14,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const dotenv_1 = __importDefault(require("dotenv"));
+const path_1 = __importDefault(require("path"));
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 const cors_1 = __importDefault(require("cors"));
@@ -28,7 +29,8 @@ const fileUpload_2 = require("./middleware/fileUpload");
 app.use(express_1.default.json());
 app.use((0, cors_1.default)({ credentials: true, origin: "http://localhost:3000" }));
 app.use((0, cookie_parser_1.default)());
-app.use("/uploads", express_1.default.static(__dirname + "/uploads"));
+const uploadsDirectory = path_1.default.join(__dirname, "../uploads");
+app.use("/uploads", express_1.default.static(uploadsDirectory));
 const salt = bcryptjs_1.default.genSaltSync(10);
 const SECRET = "jdkshfaksjfkjads";
 const mongoUrl = process.env.MONGO;
@@ -153,11 +155,18 @@ app.put(`/post`, fileUpload_1.uploadMiddleware.single("file"), (req, res) => __a
                 return res.status(403).json({ message: "error occurs in info" });
             const { id, title, summary, content } = req.body;
             const postDoc = yield Post_1.default.findById(id);
-            if (!postDoc)
+            if (!(postDoc === null || postDoc === void 0 ? void 0 : postDoc.cover))
                 return res.status(403);
             const isAuthor = JSON.stringify(postDoc.author) === JSON.stringify(info.id);
             if (!isAuthor) {
                 return res.status(401).json("wrong author");
+            }
+            if (newPath) {
+                const imageLink = path_1.default.join(__dirname, "..", postDoc.cover);
+                fileUpload_2.fs.unlink(imageLink, (err) => {
+                    if (err)
+                        console.log(err);
+                });
             }
             const updatedCover = newPath ? newPath : postDoc.cover;
             yield Post_1.default.updateOne({ _id: id, author: info.id }, {
@@ -178,10 +187,16 @@ app.put(`/post`, fileUpload_1.uploadMiddleware.single("file"), (req, res) => __a
 app.delete(`/post/:id`, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
     try {
-        const postDoc = yield Post_1.default.deleteOne({ _id: id });
-        if (!postDoc) {
+        const postDoc = yield Post_1.default.findById(id);
+        if (!(postDoc === null || postDoc === void 0 ? void 0 : postDoc.cover)) {
             return res.status(404).json({ error: "Post not found" });
         }
+        const imageLink = path_1.default.join(__dirname, "..", postDoc.cover);
+        fileUpload_2.fs.unlink(imageLink, (err) => {
+            if (err)
+                console.log(err);
+        });
+        yield Post_1.default.deleteOne({ _id: id });
         res.json({ message: "Post deleted successfully" });
     }
     catch (error) {
