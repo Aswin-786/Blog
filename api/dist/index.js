@@ -27,7 +27,7 @@ const cookie_parser_1 = __importDefault(require("cookie-parser"));
 const fileUpload_1 = require("./middleware/fileUpload");
 const fileUpload_2 = require("./middleware/fileUpload");
 app.use(express_1.default.json());
-app.use((0, cors_1.default)({ credentials: true, origin: "http://localhost:3000" }));
+app.use((0, cors_1.default)({ credentials: true, origin: "http://localhost:3001" }));
 app.use((0, cookie_parser_1.default)());
 const uploadsDirectory = path_1.default.join(__dirname, "../uploads");
 app.use("/uploads", express_1.default.static(uploadsDirectory));
