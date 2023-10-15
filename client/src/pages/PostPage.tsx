@@ -7,6 +7,7 @@ import axios, { AxiosResponse } from "axios";
 import { Button } from "@mui/material";
 import { useRecoilValue } from "recoil";
 import { userIdState } from "../store/selectors/userDetails";
+import ErrorPage from "./ErrorPage";
 
 interface PostInfo {
   _id: string;
@@ -35,7 +36,9 @@ const PostPage: React.FC = () => {
         if (res.status === 200) {
           setPostInfo(res.data);
         }
-      } catch (error) {}
+      } catch (error) {
+        return <ErrorPage />;
+      }
     };
     getPost();
   }, []);
