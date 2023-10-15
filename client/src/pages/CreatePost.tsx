@@ -1,39 +1,19 @@
-import React, { useState } from "react";
-import "react-quill/dist/quill.snow.css";
-import { useNavigate } from "react-router-dom";
+import React from "react";
 import Editor from "../components/Editor";
-import axios from "axios";
+import useCreatePost from "../hooks/useCreatePost";
 
 const CreatePost: React.FC = () => {
-  const [title, setTitle] = useState<string>("");
-  const [summary, setSummary] = useState<string>("");
-  const [content, setContent] = useState<string>("");
-  const [files, setFiles] = useState<FileList | null>(null);
-
-  const navigate = useNavigate();
-
-  async function createNewPost(e: React.FormEvent) {
-    e.preventDefault();
-    const data = new FormData();
-    data.append("title", title);
-    data.append("summary", summary);
-    data.append("content", content);
-    if (files && files[0]) {
-      data.append("file", files[0]);
-    }
-
-    try {
-      await axios.post("http://localhost:4000/post", data, {
-        withCredentials: true,
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-      navigate("/");
-    } catch (error) {
-      console.error("Error creating a new post:", error);
-    }
-  }
+  const {
+    title,
+    summary,
+    content,
+    files,
+    handleSetTitle,
+    handleSetFiles,
+    handleSetSummary,
+    handleSetContent,
+    createNewPost,
+  } = useCreatePost();
 
   return (
     <form onSubmit={createNewPost} className="flex flex-col gap-5 mt-32">
@@ -41,16 +21,16 @@ const CreatePost: React.FC = () => {
         type="text"
         placeholder="Title"
         value={title}
-        onChange={(e) => setTitle(e.target.value)}
+        onChange={handleSetTitle}
       />
       <input
         type="text"
         placeholder="Summary"
         value={summary}
-        onChange={(e) => setSummary(e.target.value)}
+        onChange={handleSetSummary}
       />
-      <input type="file" onChange={(e) => setFiles(e.target.files)} />
-      <Editor onChange={setContent} value={content} />
+      <input type="file" onChange={handleSetFiles} />
+      <Editor onChange={handleSetContent} value={content} />
       <button className="mt-2"> Create Post</button>
     </form>
   );
