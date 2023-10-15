@@ -1,59 +1,25 @@
 import { formatISO9075 } from "date-fns";
-import React, { useEffect, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import React from "react";
+import { Link } from "react-router-dom";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
-import axios, { AxiosResponse } from "axios";
-import { Button } from "@mui/material";
+import Button from "@mui/material/Button";
 import { useRecoilValue } from "recoil";
 import { userIdState } from "../store/selectors/userDetails";
+import useSinglePost from "../hooks/useSinglePost";
 import ErrorPage from "./ErrorPage";
 
-interface PostInfo {
-  _id: string;
-  title: string;
-  author: {
-    _id: string;
-    username: string;
-  };
-  createdAt: string;
-  cover: string;
-  content: string;
-}
-
 const PostPage: React.FC = () => {
-  const { id } = useParams<{ id?: string }>();
-  const [postInfo, setPostInfo] = useState<PostInfo | null>(null);
+  const { error, deleteItem, postInfo } = useSinglePost();
   const userId = useRecoilValue(userIdState);
-  const navigate = useNavigate();
 
-  useEffect(() => {
-    const getPost = async () => {
-      try {
-        const res: AxiosResponse = await axios.get(
-          `http://localhost:4000/post/${id}`
-        );
-        if (res.status === 200) {
-          setPostInfo(res.data);
-        }
-      } catch (error) {
-        return <ErrorPage />;
-      }
-    };
-    getPost();
-  }, []);
+  if (error) {
+    return <ErrorPage />;
+  }
 
-  if (!postInfo) return null;
-
-  const deleteItem = async () => {
-    const res: AxiosResponse = await axios.delete(
-      `http://localhost:4000/post/${id}`,
-      {}
-    );
-    if (res.status === 200) {
-      navigate("/");
-    }
-  };
+  if (!postInfo) {
+    return null;
+  }
 
   return (
     <div className="post-page">
