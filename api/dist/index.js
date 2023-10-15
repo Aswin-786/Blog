@@ -16,7 +16,6 @@ const express_1 = __importDefault(require("express"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const path_1 = __importDefault(require("path"));
 dotenv_1.default.config();
-const app = (0, express_1.default)();
 const cors_1 = __importDefault(require("cors"));
 const mongoose_1 = __importDefault(require("mongoose"));
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
@@ -26,8 +25,10 @@ const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const cookie_parser_1 = __importDefault(require("cookie-parser"));
 const fileUpload_1 = require("./middleware/fileUpload");
 const fileUpload_2 = require("./middleware/fileUpload");
+const zod_1 = require("zod");
+const app = (0, express_1.default)();
 app.use(express_1.default.json());
-app.use((0, cors_1.default)({ credentials: true, origin: "http://localhost:3001" }));
+app.use((0, cors_1.default)({ credentials: true, origin: "http://localhost:3000" }));
 app.use((0, cookie_parser_1.default)());
 const uploadsDirectory = path_1.default.join(__dirname, "../uploads");
 app.use("/uploads", express_1.default.static(uploadsDirectory));
@@ -35,16 +36,23 @@ const salt = bcryptjs_1.default.genSaltSync(10);
 const SECRET = "jdkshfaksjfkjads";
 const mongoUrl = process.env.MONGO;
 if (!mongoUrl) {
-    console.error("wron mongo url");
+    console.error("wrong mongo url");
     process.exit(1);
 }
 mongoose_1.default.connect(mongoUrl);
+let userInputs = zod_1.z.object({
+    username: zod_1.z.string().min(1).max(25),
+    password: zod_1.z.string().min(6).max(20),
+});
 app.post("/register", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const inputs = req.body;
+    const inputs = userInputs.safeParse(req.body);
+    if (!inputs.success) {
+        return res.status(411).json({ message: inputs.error });
+    }
     try {
         const userDoc = yield User_1.default.create({
-            username: inputs.username,
-            password: bcryptjs_1.default.hashSync(inputs.password, salt),
+            username: inputs.data.username,
+            password: bcryptjs_1.default.hashSync(inputs.data.password, salt),
         });
         res.status(201).json(userDoc);
     }

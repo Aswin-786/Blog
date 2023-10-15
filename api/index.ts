@@ -2,7 +2,6 @@ import express from "express";
 import dotenv from "dotenv";
 import path from "path";
 dotenv.config();
-const app = express();
 import cors from "cors";
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
@@ -12,6 +11,8 @@ import jwt from "jsonwebtoken";
 import cookieParser from "cookie-parser";
 import { uploadMiddleware } from "./middleware/fileUpload";
 import { fs } from "./middleware/fileUpload";
+import { z } from "zod";
+const app = express();
 
 app.use(express.json());
 app.use(cors({ credentials: true, origin: "http://localhost:3000" }));
@@ -25,15 +26,22 @@ const SECRET = "jdkshfaksjfkjads";
 const mongoUrl = process.env.MONGO;
 
 if (!mongoUrl) {
-  console.error("wron mongo url");
+  console.error("wrong mongo url");
   process.exit(1);
 }
 mongoose.connect(mongoUrl);
 
-interface UserDetails {
-  username: string;
-  password: string;
-}
+let userInputs = z.object({
+  username: z.string().min(1).max(25),
+  password: z.string().min(6).max(20),
+});
+
+let PostInputs = z.object({
+  id: z.string().min(1).max(100),
+  title: z.string().min(1).max(500),
+  summary: z.string().min(1),
+  content: z.string(),
+});
 
 interface Token {
   token: string;
@@ -47,11 +55,14 @@ interface PostDetails {
 }
 
 app.post("/register", async (req, res) => {
-  const inputs: UserDetails = req.body;
+  const inputs = userInputs.safeParse(req.body);
+  if (!inputs.success) {
+    return res.status(411).json({ message: inputs.error });
+  }
   try {
     const userDoc = await User.create({
-      username: inputs.username,
-      password: bcrypt.hashSync(inputs.password, salt),
+      username: inputs.data.username,
+      password: bcrypt.hashSync(inputs.data.password, salt),
     });
     res.status(201).json(userDoc);
   } catch (error) {
@@ -60,21 +71,24 @@ app.post("/register", async (req, res) => {
 });
 
 app.post("/login", async (req, res) => {
-  const inputs: UserDetails = req.body;
+  const inputs = userInputs.safeParse(req.body);
+  if (!inputs.success) {
+    return res.status(411).json({ message: inputs.error });
+  }
   try {
-    const userDoc = await User.findOne({ username: inputs.username });
+    const userDoc = await User.findOne({ username: inputs.data.username });
     if (userDoc) {
-      const passOk = bcrypt.compareSync(inputs.password, userDoc.password);
+      const passOk = bcrypt.compareSync(inputs.data.password, userDoc.password);
       if (passOk) {
         jwt.sign(
-          { username: inputs.username, id: userDoc._id },
+          { username: inputs.data.username, id: userDoc._id },
           SECRET,
           {},
           (err, token) => {
             if (err) throw err;
             res.cookie("token", token).json({
               id: userDoc._id,
-              username: inputs.username,
+              username: inputs.data.username,
             });
           }
         );
@@ -103,15 +117,21 @@ app.post("/logout", (req, res) => {
 
 app.post("/post", uploadMiddleware.single("file"), async (req, res) => {
   const { originalname, path } = req.file || {};
-  if (!originalname) return res.status(401).json({ message: "file missing" });
-  if (!path) return res.status(401).json({ message: "file missing" });
+  if (!originalname || !path)
+    return res.status(401).json({ message: "file missing" });
   const ext = originalname.split(".")[1];
   const newPath = path + "." + ext;
   fs.renameSync(path, newPath);
   const { token }: Token = req.cookies;
   jwt.verify(token, SECRET, {}, async (err, info) => {
     if (err) throw err;
-    const { title, summary, content }: PostDetails = req.body;
+    const postInputs = PostInputs.safeParse(req.body);
+    if (!postInputs.success) {
+      return res.status(411).json({ message: postInputs.error });
+    }
+    const title = postInputs.data.title;
+    const summary = postInputs.data.summary;
+    const content = postInputs.data.content;
     if (!info) return res.status(401).json({ message: "error occurs in info" });
     if (typeof info === "string")
       return res.status(401).json({ message: "error occurs in info" });
@@ -160,7 +180,14 @@ app.put(`/post`, uploadMiddleware.single("file"), async (req, res) => {
         return res.status(403).json({ message: "error occurs in info" });
       if (typeof info === "string")
         return res.status(403).json({ message: "error occurs in info" });
-      const { id, title, summary, content }: PostDetails = req.body;
+      const postInputs = PostInputs.safeParse(req.body);
+      if (!postInputs.success) {
+        return res.status(411).json({ message: postInputs.error });
+      }
+      const title = postInputs.data.title;
+      const summary = postInputs.data.summary;
+      const content = postInputs.data.content;
+      const id = postInputs.data.id;
       const postDoc = await Post.findById(id);
       if (!postDoc?.cover) return res.status(403);
       const isAuthor =
