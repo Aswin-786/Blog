@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import axios, { AxiosResponse } from "axios";
 import { TextField } from "@mui/material";
 import { Link } from "react-router-dom";
+import ErrorPage from "./ErrorPage";
 
 const RegisterPage: React.FC = () => {
   const [username, setUsername] = useState<string>("");
@@ -29,7 +30,7 @@ const RegisterPage: React.FC = () => {
         alert("Registration failed");
       }
     } catch (error) {
-      console.error("Error during registration:", error);
+      return <ErrorPage />;
     }
   }
   return (
