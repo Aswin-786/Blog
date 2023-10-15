@@ -1,37 +1,14 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import axios, { AxiosResponse } from "axios";
-import { useRecoilValue, useSetRecoilState } from "recoil";
+import { Link } from "react-router-dom";
+import { useRecoilValue } from "recoil";
 import { userEmailState, userIdState } from "../store/selectors/userDetails";
-import { userState } from "../store/atoms/User";
+import useLogout from "../hooks/useLogout";
 
 const Header: React.FC = () => {
-  const navigate = useNavigate();
   const [toggle, setToggle] = useState(false);
   const userName = useRecoilValue(userEmailState);
-  const setUser = useSetRecoilState(userState);
+  const logout = useLogout();
   const userId = useRecoilValue(userIdState);
-
-  async function logout() {
-    try {
-      const res: AxiosResponse = await axios.post(
-        "http://localhost:4000/logout",
-        {
-          withCredentials: true,
-        }
-      );
-      if (res.status === 200) {
-        document.cookie =
-          "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-        setUser({
-          isLoading: false,
-          userName: null,
-          userId: null,
-        });
-        navigate("/login");
-      }
-    } catch (error) {}
-  }
 
   return (
     <header className="md:flex md:flex-row md:items-center md:justify-between flex flex-col items-start ">
