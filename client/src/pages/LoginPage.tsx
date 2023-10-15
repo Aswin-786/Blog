@@ -4,6 +4,7 @@ import TextField from "@mui/material/TextField";
 import axios from "axios";
 import { userState } from "../store/atoms/User";
 import { useSetRecoilState } from "recoil";
+import ErrorPage from "./ErrorPage";
 
 const LoginPage: React.FC = () => {
   const [username, setUsername] = useState<string>("");
@@ -39,7 +40,7 @@ const LoginPage: React.FC = () => {
         alert("Wrong credentials");
       }
     } catch (error) {
-      console.error("Error during login:", error);
+      return <ErrorPage />;
     }
   }
   return (
