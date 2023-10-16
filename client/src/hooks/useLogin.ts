@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { userState } from "../store/atoms/User";
 import { useSetRecoilState } from "recoil";
 import axios from "axios";
+import { userInputParams } from "@aswin___786/common";
 
 const useLogin = () => {
   const [username, setUsername] = useState<string>("");
@@ -19,14 +20,15 @@ const useLogin = () => {
     setPassword(e.target.value);
   };
 
+  const userInput: userInputParams = { username, password };
+
   const login = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
     try {
       const response = await axios.post(
         "http://localhost:4000/login",
         {
-          username,
-          password,
+          userInput,
         },
         {
           headers: {
