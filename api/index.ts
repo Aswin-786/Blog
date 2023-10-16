@@ -11,7 +11,9 @@ import jwt from "jsonwebtoken";
 import cookieParser from "cookie-parser";
 import { uploadMiddleware } from "./middleware/fileUpload";
 import { fs } from "./middleware/fileUpload";
-import { z } from "zod";
+
+import { PostInputs, userInputs } from "@aswin___786/common";
+
 const app = express();
 
 app.use(express.json());
@@ -31,27 +33,8 @@ if (!mongoUrl) {
 }
 mongoose.connect(mongoUrl);
 
-let userInputs = z.object({
-  username: z.string().min(1).max(25),
-  password: z.string().min(6).max(20),
-});
-
-let PostInputs = z.object({
-  id: z.string().min(1).max(100),
-  title: z.string().min(1).max(500),
-  summary: z.string().min(1),
-  content: z.string(),
-});
-
 interface Token {
   token: string;
-}
-
-interface PostDetails {
-  id: string;
-  title: string;
-  summary: string;
-  content: string;
 }
 
 app.post("/register", async (req, res) => {
