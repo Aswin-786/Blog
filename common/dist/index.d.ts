@@ -27,3 +27,17 @@ export declare const PostInputs: z.ZodObject<{
     content: string;
 }>;
 export type postInputParams = z.infer<typeof PostInputs>;
+export declare const fileSchema: z.ZodObject<{
+    name: z.ZodString;
+    type: z.ZodString;
+    size: z.ZodNumber;
+}, "strip", z.ZodTypeAny, {
+    type: string;
+    name: string;
+    size: number;
+}, {
+    type: string;
+    name: string;
+    size: number;
+}>;
+export declare const validateFile: (file: File) => boolean;

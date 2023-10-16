@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.PostInputs = exports.userInputs = void 0;
+exports.validateFile = exports.fileSchema = exports.PostInputs = exports.userInputs = void 0;
 const zod_1 = require("zod");
 exports.userInputs = zod_1.z.object({
     username: zod_1.z.string().min(1).max(25),
@@ -12,3 +12,22 @@ exports.PostInputs = zod_1.z.object({
     summary: zod_1.z.string().min(1),
     content: zod_1.z.string(),
 });
+exports.fileSchema = zod_1.z.object({
+    name: zod_1.z.string(),
+    type: zod_1.z.string(),
+    size: zod_1.z.number(),
+});
+const validateFile = (file) => {
+    const fileValidation = exports.fileSchema.safeParse(file);
+    if (!fileValidation.success) {
+        console.error("File validation failed:", fileValidation.error);
+        return false;
+    }
+    const allowedTypes = ["image/jpeg", "image/png", "image/gif"];
+    if (!allowedTypes.includes(file.type)) {
+        console.error("Unsupported file type. Please choose a valid image file.");
+        return false;
+    }
+    return true;
+};
+exports.validateFile = validateFile;

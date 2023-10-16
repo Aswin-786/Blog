@@ -1,6 +1,7 @@
 import React, { ChangeEvent, useState } from "react";
 import "react-quill/dist/quill.snow.css";
 import { useNavigate } from "react-router-dom";
+import { PostInputs, validateFile } from "@aswin___786/common";
 
 import axios from "axios";
 
@@ -28,14 +29,31 @@ const useCreatePost = () => {
     setFiles(e.target.files);
   };
 
+  const id = "11111111111111";
+
   async function createNewPost(e: React.FormEvent) {
     e.preventDefault();
+
+    const postDataCheck = PostInputs.safeParse({ title, summary, content, id });
+    if (!postDataCheck.success) return console.error("wrong formats");
+
     const data = new FormData();
     data.append("title", title);
     data.append("summary", summary);
     data.append("content", content);
+
     if (files && files[0]) {
-      data.append("file", files[0]);
+      // const file = {
+      //   name: files[0].name,
+      //   type: files[0].type,
+      //   size: files[0].size,
+      // };
+
+      if (validateFile(files[0])) {
+        data.append("file", files[0]);
+      } else {
+        return console.log("file uploaded wrong");
+      }
     }
 
     try {

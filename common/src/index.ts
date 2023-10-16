@@ -15,3 +15,26 @@ export const PostInputs = z.object({
 });
 
 export type postInputParams = z.infer<typeof PostInputs>;
+
+export const fileSchema = z.object({
+  name: z.string(),
+  type: z.string(),
+  size: z.number(),
+});
+
+export const validateFile = (file: File) => {
+  const fileValidation = fileSchema.safeParse(file);
+
+  if (!fileValidation.success) {
+    console.error("File validation failed:", fileValidation.error);
+    return false;
+  }
+
+  const allowedTypes = ["image/jpeg", "image/png", "image/gif"];
+  if (!allowedTypes.includes(file.type)) {
+    console.error("Unsupported file type. Please choose a valid image file.");
+    return false;
+  }
+
+  return true;
+};
