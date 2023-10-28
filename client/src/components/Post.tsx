@@ -39,9 +39,7 @@ const Post: React.FC<PostProps> = ({
         <div className="text">
           <h2>{title}</h2>
           <div className="info">
-            <a href="" className="author">
-              {author.username}
-            </a>
+            <p className="author">{author.username}</p>
             <time className="font-light">
               {format(new Date(createdAt), "MMM d, yyyy HH:mm")}
             </time>
