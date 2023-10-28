@@ -11,20 +11,20 @@ export declare const userInputs: z.ZodObject<{
 }>;
 export type userInputParams = z.infer<typeof userInputs>;
 export declare const PostInputs: z.ZodObject<{
-    id: z.ZodString;
+    id: z.ZodOptional<z.ZodString>;
     title: z.ZodString;
     summary: z.ZodString;
     content: z.ZodString;
 }, "strip", z.ZodTypeAny, {
-    id: string;
     title: string;
     summary: string;
     content: string;
+    id?: string | undefined;
 }, {
-    id: string;
     title: string;
     summary: string;
     content: string;
+    id?: string | undefined;
 }>;
 export type postInputParams = z.infer<typeof PostInputs>;
 export declare const fileSchema: z.ZodObject<{

@@ -8,7 +8,7 @@ export const userInputs = z.object({
 export type userInputParams = z.infer<typeof userInputs>;
 
 export const PostInputs = z.object({
-  id: z.string().min(1).max(100),
+  id: z.string().min(1).max(100).optional(),
   title: z.string().min(1).max(500),
   summary: z.string().min(1),
   content: z.string(),

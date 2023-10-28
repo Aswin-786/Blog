@@ -7,7 +7,7 @@ exports.userInputs = zod_1.z.object({
     password: zod_1.z.string().min(6).max(20),
 });
 exports.PostInputs = zod_1.z.object({
-    id: zod_1.z.string().min(1).max(100),
+    id: zod_1.z.string().min(1).max(100).optional(),
     title: zod_1.z.string().min(1).max(500),
     summary: zod_1.z.string().min(1),
     content: zod_1.z.string(),
