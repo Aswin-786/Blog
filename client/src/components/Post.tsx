@@ -29,7 +29,10 @@ const Post: React.FC<PostProps> = ({
         <div className="image">
           <img
             className="rounded-l-md"
-            src={"http://localhost:4000/" + cover}
+            src={
+              "https://zepjyypndjdibhvsxifk.supabase.co/storage/v1/object/public/share/" +
+              cover
+            }
             alt=""
           />
         </div>
