@@ -25,7 +25,9 @@ const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const cookie_parser_1 = __importDefault(require("cookie-parser"));
 const fileUpload_1 = require("./middleware/fileUpload");
 const fileUpload_2 = require("./middleware/fileUpload");
-const zod_1 = require("zod");
+const common_1 = require("@aswin___786/common");
+const supabase_js_1 = require("@supabase/supabase-js");
+// import { OAuth2Client } from "google-auth-library";
 const app = (0, express_1.default)();
 app.use(express_1.default.json());
 app.use((0, cors_1.default)({ credentials: true, origin: "http://localhost:3000" }));
@@ -40,12 +42,19 @@ if (!mongoUrl) {
     process.exit(1);
 }
 mongoose_1.default.connect(mongoUrl);
-let userInputs = zod_1.z.object({
-    username: zod_1.z.string().min(1).max(25),
-    password: zod_1.z.string().min(6).max(20),
-});
+const supabaseUrl = "https://zepjyypndjdibhvsxifk.supabase.co";
+const supabaseKey = process.env.SUPABASE_KEY;
+if (!supabaseKey) {
+    console.error("wrong supabase url");
+    process.exit(1);
+}
+const supabase = (0, supabase_js_1.createClient)(supabaseUrl, supabaseKey);
 app.post("/register", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const inputs = userInputs.safeParse(req.body);
+    const { userInput } = req.body;
+    const inputs = common_1.userInputs.safeParse({
+        username: userInput.username,
+        password: userInput.password,
+    });
     if (!inputs.success) {
         return res.status(411).json({ message: inputs.error });
     }
@@ -61,18 +70,25 @@ app.post("/register", (req, res) => __awaiter(void 0, void 0, void 0, function* 
     }
 }));
 app.post("/login", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const inputs = req.body;
+    const { userInput } = req.body;
+    const inputs = common_1.userInputs.safeParse({
+        username: userInput.username,
+        password: userInput.password,
+    });
+    if (!inputs.success) {
+        return res.status(411).json({ message: inputs.error });
+    }
     try {
-        const userDoc = yield User_1.default.findOne({ username: inputs.username });
+        const userDoc = yield User_1.default.findOne({ username: inputs.data.username });
         if (userDoc) {
-            const passOk = bcryptjs_1.default.compareSync(inputs.password, userDoc.password);
+            const passOk = bcryptjs_1.default.compareSync(inputs.data.password, userDoc.password);
             if (passOk) {
-                jsonwebtoken_1.default.sign({ username: inputs.username, id: userDoc._id }, SECRET, {}, (err, token) => {
+                jsonwebtoken_1.default.sign({ username: inputs.data.username, id: userDoc._id }, SECRET, {}, (err, token) => {
                     if (err)
                         throw err;
                     res.cookie("token", token).json({
                         id: userDoc._id,
-                        username: inputs.username,
+                        username: inputs.data.username,
                     });
                 });
             }
@@ -101,18 +117,38 @@ app.post("/logout", (req, res) => {
 });
 app.post("/post", fileUpload_1.uploadMiddleware.single("file"), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { originalname, path } = req.file || {};
-    if (!originalname)
-        return res.status(401).json({ message: "file missing" });
-    if (!path)
+    if (!originalname || !path)
         return res.status(401).json({ message: "file missing" });
     const ext = originalname.split(".")[1];
     const newPath = path + "." + ext;
     fileUpload_2.fs.renameSync(path, newPath);
+    try {
+        const { data, error } = yield supabase.storage
+            .from("share") // Replace 'uploads' with your bucket name
+            .upload(newPath, fileUpload_2.fs.createReadStream(newPath), {
+            duplex: "half",
+        });
+        if (error) {
+            return res.status(500).json({ message: "File upload failed.", error });
+        }
+        // Remove the temporary file from your server
+        fileUpload_2.fs.unlinkSync(newPath);
+    }
+    catch (error) {
+        console.error("Supabase upload error:", error);
+        return res.status(500).json({ message: "File upload failed.", error });
+    }
     const { token } = req.cookies;
     jsonwebtoken_1.default.verify(token, SECRET, {}, (err, info) => __awaiter(void 0, void 0, void 0, function* () {
         if (err)
             throw err;
-        const { title, summary, content } = req.body;
+        const postInputs = common_1.PostInputs.safeParse(req.body);
+        if (!postInputs.success) {
+            return res.status(411).json({ message: postInputs.error });
+        }
+        const title = postInputs.data.title;
+        const summary = postInputs.data.summary;
+        const content = postInputs.data.content;
         if (!info)
             return res.status(401).json({ message: "error occurs in info" });
         if (typeof info === "string")
@@ -152,6 +188,24 @@ app.put(`/post`, fileUpload_1.uploadMiddleware.single("file"), (req, res) => __a
             const ext = originalname.split(".")[1];
             newPath = path + "." + ext;
             fileUpload_2.fs.renameSync(path, newPath);
+            try {
+                const { data, error } = yield supabase.storage
+                    .from("share") // Replace 'uploads' with your bucket name
+                    .upload(newPath, fileUpload_2.fs.createReadStream(newPath), {
+                    duplex: "half",
+                });
+                if (error) {
+                    return res
+                        .status(500)
+                        .json({ message: "File upload failed.", error });
+                }
+                // Remove the temporary file from your server
+                fileUpload_2.fs.unlinkSync(newPath);
+            }
+            catch (error) {
+                console.error("Supabase upload error:", error);
+                return res.status(500).json({ message: "File upload failed.", error });
+            }
         }
         const { token } = req.cookies;
         jsonwebtoken_1.default.verify(token, SECRET, {}, (err, info) => __awaiter(void 0, void 0, void 0, function* () {
@@ -161,7 +215,14 @@ app.put(`/post`, fileUpload_1.uploadMiddleware.single("file"), (req, res) => __a
                 return res.status(403).json({ message: "error occurs in info" });
             if (typeof info === "string")
                 return res.status(403).json({ message: "error occurs in info" });
-            const { id, title, summary, content } = req.body;
+            const postInputs = common_1.PostInputs.safeParse(req.body);
+            if (!postInputs.success) {
+                return res.status(411).json({ message: postInputs.error });
+            }
+            const title = postInputs.data.title;
+            const summary = postInputs.data.summary;
+            const content = postInputs.data.content;
+            const id = postInputs.data.id;
             const postDoc = yield Post_1.default.findById(id);
             if (!(postDoc === null || postDoc === void 0 ? void 0 : postDoc.cover))
                 return res.status(403);
@@ -170,11 +231,25 @@ app.put(`/post`, fileUpload_1.uploadMiddleware.single("file"), (req, res) => __a
                 return res.status(401).json("wrong author");
             }
             if (newPath) {
-                const imageLink = path_1.default.join(__dirname, "..", postDoc.cover);
-                fileUpload_2.fs.unlink(imageLink, (err) => {
-                    if (err)
-                        console.log(err);
-                });
+                // const imageLink = path.join(__dirname, "..", postDoc.cover);
+                // fs.unlink(imageLink, (err) => {
+                //   if (err) console.log(err);
+                // });
+                const coverPath = postDoc.cover;
+                const imageName = coverPath
+                    ? coverPath.split("\\").pop()
+                    : undefined;
+                if (imageName === undefined) {
+                    return res.status(500).json({ error: "Image name is undefined" });
+                }
+                const { data, error } = yield supabase.storage
+                    .from("share") // Specify the 'uploads' folder within the 'share' bucket
+                    .remove([`uploads/${imageName}`]);
+                if (error) {
+                    return res
+                        .status(500)
+                        .json({ error: "Supabase image deletion failed", details: error });
+                }
             }
             const updatedCover = newPath ? newPath : postDoc.cover;
             yield Post_1.default.updateOne({ _id: id, author: info.id }, {
@@ -199,11 +274,21 @@ app.delete(`/post/:id`, (req, res) => __awaiter(void 0, void 0, void 0, function
         if (!(postDoc === null || postDoc === void 0 ? void 0 : postDoc.cover)) {
             return res.status(404).json({ error: "Post not found" });
         }
-        const imageLink = path_1.default.join(__dirname, "..", postDoc.cover);
-        fileUpload_2.fs.unlink(imageLink, (err) => {
-            if (err)
-                console.log(err);
-        });
+        const coverPath = postDoc.cover;
+        const imageName = coverPath
+            ? coverPath.split("\\").pop()
+            : undefined;
+        if (imageName === undefined) {
+            return res.status(500).json({ error: "Image name is undefined" });
+        }
+        const { data, error } = yield supabase.storage
+            .from("share") // Specify the 'uploads' folder within the 'share' bucket
+            .remove([`uploads/${imageName}`]);
+        if (error) {
+            return res
+                .status(500)
+                .json({ error: "Supabase image deletion failed", details: error });
+        }
         yield Post_1.default.deleteOne({ _id: id });
         res.json({ message: "Post deleted successfully" });
     }

@@ -294,7 +294,7 @@ app.delete(`/post/:id`, async (req, res) => {
     }
 
     const { data, error } = await supabase.storage
-      .from("share") // Specify the 'uploads' folder within the 'share' bucket
+      .from("share")
       .remove([`uploads/${imageName}`]);
 
     if (error) {
