@@ -21,7 +21,6 @@ const useRegister = () => {
 
   const register = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
-    console.log("hi");
 
     try {
       const response: AxiosResponse = await axios.post(
