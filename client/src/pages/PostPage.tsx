@@ -56,7 +56,10 @@ const PostPage: React.FC = () => {
       <div className="flex items-center justify-center">
         <img
           className="md:h-[500px] h-[300px]"
-          src={"http://localhost:4000/" + postInfo.cover}
+          src={
+            "https://zepjyypndjdibhvsxifk.supabase.co/storage/v1/object/public/share/" +
+            postInfo.cover
+          }
           alt=""
         />
       </div>
