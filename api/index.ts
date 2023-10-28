@@ -14,6 +14,8 @@ import { fs } from "./middleware/fileUpload";
 
 import { PostInputs, userInputs } from "@aswin___786/common";
 
+import { createClient } from "@supabase/supabase-js";
+
 const app = express();
 
 app.use(express.json());
@@ -33,12 +35,25 @@ if (!mongoUrl) {
 }
 mongoose.connect(mongoUrl);
 
+const supabaseUrl = "https://zepjyypndjdibhvsxifk.supabase.co";
+const supabaseKey = process.env.SUPABASE_KEY;
+if (!supabaseKey) {
+  console.error("wrong supabase url");
+  process.exit(1);
+}
+const supabase = createClient(supabaseUrl, supabaseKey);
+
 interface Token {
   token: string;
 }
 
 app.post("/register", async (req, res) => {
-  const inputs = userInputs.safeParse(req.body);
+  const { userInput } = req.body;
+
+  const inputs = userInputs.safeParse({
+    username: userInput.username,
+    password: userInput.password,
+  });
   if (!inputs.success) {
     return res.status(411).json({ message: inputs.error });
   }
@@ -54,7 +69,12 @@ app.post("/register", async (req, res) => {
 });
 
 app.post("/login", async (req, res) => {
-  const inputs = userInputs.safeParse(req.body);
+  const { userInput } = req.body;
+
+  const inputs = userInputs.safeParse({
+    username: userInput.username,
+    password: userInput.password,
+  });
   if (!inputs.success) {
     return res.status(411).json({ message: inputs.error });
   }
@@ -105,7 +125,27 @@ app.post("/post", uploadMiddleware.single("file"), async (req, res) => {
   const ext = originalname.split(".")[1];
   const newPath = path + "." + ext;
   fs.renameSync(path, newPath);
+
+  try {
+    const { data, error } = await supabase.storage
+      .from("share")
+      .upload(newPath, fs.createReadStream(newPath), {
+        duplex: "half",
+      });
+
+    if (error) {
+      return res.status(500).json({ message: "File upload failed.", error });
+    }
+
+    // Remove the temporary file server
+    fs.unlinkSync(newPath);
+  } catch (error) {
+    console.error("Supabase upload error:", error);
+    return res.status(500).json({ message: "File upload failed.", error });
+  }
+
   const { token }: Token = req.cookies;
+
   jwt.verify(token, SECRET, {}, async (err, info) => {
     if (err) throw err;
     const postInputs = PostInputs.safeParse(req.body);
@@ -155,6 +195,26 @@ app.put(`/post`, uploadMiddleware.single("file"), async (req, res) => {
       const ext = originalname.split(".")[1];
       newPath = path + "." + ext;
       fs.renameSync(path, newPath);
+
+      try {
+        const { data, error } = await supabase.storage
+          .from("share")
+          .upload(newPath, fs.createReadStream(newPath), {
+            duplex: "half",
+          });
+
+        if (error) {
+          return res
+            .status(500)
+            .json({ message: "File upload failed.", error });
+        }
+
+        // Remove the temporary file from server
+        fs.unlinkSync(newPath);
+      } catch (error) {
+        console.error("Supabase upload error:", error);
+        return res.status(500).json({ message: "File upload failed.", error });
+      }
     }
     const { token }: Token = req.cookies;
     jwt.verify(token, SECRET, {}, async (err, info) => {
@@ -179,10 +239,24 @@ app.put(`/post`, uploadMiddleware.single("file"), async (req, res) => {
         return res.status(401).json("wrong author");
       }
       if (newPath) {
-        const imageLink = path.join(__dirname, "..", postDoc.cover);
-        fs.unlink(imageLink, (err) => {
-          if (err) console.log(err);
-        });
+        const coverPath = postDoc.cover;
+        const imageName: string | undefined = coverPath
+          ? coverPath.split("\\").pop()
+          : undefined;
+
+        if (imageName === undefined) {
+          return res.status(500).json({ error: "Image name is undefined" });
+        }
+
+        const { data, error } = await supabase.storage
+          .from("share")
+          .remove([`uploads/${imageName}`]);
+
+        if (error) {
+          return res
+            .status(500)
+            .json({ error: "Supabase image deletion failed", details: error });
+        }
       }
       const updatedCover = newPath ? newPath : postDoc.cover;
       await Post.updateOne(
@@ -210,10 +284,24 @@ app.delete(`/post/:id`, async (req, res) => {
     if (!postDoc?.cover) {
       return res.status(404).json({ error: "Post not found" });
     }
-    const imageLink = path.join(__dirname, "..", postDoc.cover);
-    fs.unlink(imageLink, (err) => {
-      if (err) console.log(err);
-    });
+    const coverPath = postDoc.cover;
+    const imageName: string | undefined = coverPath
+      ? coverPath.split("\\").pop()
+      : undefined;
+
+    if (imageName === undefined) {
+      return res.status(500).json({ error: "Image name is undefined" });
+    }
+
+    const { data, error } = await supabase.storage
+      .from("share") // Specify the 'uploads' folder within the 'share' bucket
+      .remove([`uploads/${imageName}`]);
+
+    if (error) {
+      return res
+        .status(500)
+        .json({ error: "Supabase image deletion failed", details: error });
+    }
 
     await Post.deleteOne({ _id: id });
     res.json({ message: "Post deleted successfully" });
