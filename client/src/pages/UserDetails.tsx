@@ -82,7 +82,10 @@ const UserDetails = () => {
                 <Link to={`/post/${item._id}`}>
                   <div className="flex items-center  gap-4">
                     <img
-                      src={"http://localhost:4000/" + item.cover}
+                      src={
+                        "https://zepjyypndjdibhvsxifk.supabase.co/storage/v1/object/public/share/" +
+                        item.cover
+                      }
                       className="w-[100px] h-[100px] rounded-l-md"
                       alt=""
                     />
