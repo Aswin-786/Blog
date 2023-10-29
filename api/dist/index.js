@@ -27,7 +27,6 @@ const fileUpload_1 = require("./middleware/fileUpload");
 const fileUpload_2 = require("./middleware/fileUpload");
 const common_1 = require("@aswin___786/common");
 const supabase_js_1 = require("@supabase/supabase-js");
-// import { OAuth2Client } from "google-auth-library";
 const app = (0, express_1.default)();
 app.use(express_1.default.json());
 app.use((0, cors_1.default)({ credentials: true, origin: "http://localhost:3000" }));
@@ -124,14 +123,14 @@ app.post("/post", fileUpload_1.uploadMiddleware.single("file"), (req, res) => __
     fileUpload_2.fs.renameSync(path, newPath);
     try {
         const { data, error } = yield supabase.storage
-            .from("share") // Replace 'uploads' with your bucket name
+            .from("share")
             .upload(newPath, fileUpload_2.fs.createReadStream(newPath), {
             duplex: "half",
         });
         if (error) {
             return res.status(500).json({ message: "File upload failed.", error });
         }
-        // Remove the temporary file from your server
+        // Remove the temporary file server
         fileUpload_2.fs.unlinkSync(newPath);
     }
     catch (error) {
@@ -190,7 +189,7 @@ app.put(`/post`, fileUpload_1.uploadMiddleware.single("file"), (req, res) => __a
             fileUpload_2.fs.renameSync(path, newPath);
             try {
                 const { data, error } = yield supabase.storage
-                    .from("share") // Replace 'uploads' with your bucket name
+                    .from("share")
                     .upload(newPath, fileUpload_2.fs.createReadStream(newPath), {
                     duplex: "half",
                 });
@@ -199,7 +198,7 @@ app.put(`/post`, fileUpload_1.uploadMiddleware.single("file"), (req, res) => __a
                         .status(500)
                         .json({ message: "File upload failed.", error });
                 }
-                // Remove the temporary file from your server
+                // Remove the temporary file from server
                 fileUpload_2.fs.unlinkSync(newPath);
             }
             catch (error) {
@@ -231,10 +230,6 @@ app.put(`/post`, fileUpload_1.uploadMiddleware.single("file"), (req, res) => __a
                 return res.status(401).json("wrong author");
             }
             if (newPath) {
-                // const imageLink = path.join(__dirname, "..", postDoc.cover);
-                // fs.unlink(imageLink, (err) => {
-                //   if (err) console.log(err);
-                // });
                 const coverPath = postDoc.cover;
                 const imageName = coverPath
                     ? coverPath.split("\\").pop()
@@ -243,7 +238,7 @@ app.put(`/post`, fileUpload_1.uploadMiddleware.single("file"), (req, res) => __a
                     return res.status(500).json({ error: "Image name is undefined" });
                 }
                 const { data, error } = yield supabase.storage
-                    .from("share") // Specify the 'uploads' folder within the 'share' bucket
+                    .from("share")
                     .remove([`uploads/${imageName}`]);
                 if (error) {
                     return res
@@ -282,7 +277,7 @@ app.delete(`/post/:id`, (req, res) => __awaiter(void 0, void 0, void 0, function
             return res.status(500).json({ error: "Image name is undefined" });
         }
         const { data, error } = yield supabase.storage
-            .from("share") // Specify the 'uploads' folder within the 'share' bucket
+            .from("share")
             .remove([`uploads/${imageName}`]);
         if (error) {
             return res
