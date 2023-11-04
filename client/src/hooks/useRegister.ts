@@ -24,7 +24,7 @@ const useRegister = () => {
 
     try {
       const response: AxiosResponse = await axios.post(
-        "http://localhost:4000/register",
+        "http://localhost:4000/user/register",
         {
           userInput,
         },
