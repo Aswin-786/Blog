@@ -4,10 +4,15 @@ import path from "path";
 dotenv.config();
 import cors from "cors";
 import mongoose from "mongoose";
+
 import bcrypt from "bcryptjs";
+
 import User from "./models/User";
+
 import Post from "./models/Post";
+
 import jwt from "jsonwebtoken";
+
 import cookieParser from "cookie-parser";
 import { uploadMiddleware } from "./middleware/fileUpload";
 import { fs } from "./middleware/fileUpload";
@@ -16,16 +21,18 @@ import { PostInputs, userInputs } from "@aswin___786/common";
 
 import { createClient } from "@supabase/supabase-js";
 
+import userRouter from "./routes/user";
+
 const app = express();
 
 app.use(express.json());
 app.use(cors({ credentials: true, origin: "http://localhost:3000" }));
 app.use(cookieParser());
+app.use("/user", userRouter);
 
 const uploadsDirectory = path.join(__dirname, "../uploads");
 app.use("/uploads", express.static(uploadsDirectory));
 
-const salt = bcrypt.genSaltSync(10);
 const SECRET = "jdkshfaksjfkjads";
 const mongoUrl = process.env.MONGO;
 
@@ -46,77 +53,6 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 interface Token {
   token: string;
 }
-
-app.post("/register", async (req, res) => {
-  const { userInput } = req.body;
-
-  const inputs = userInputs.safeParse({
-    username: userInput.username,
-    password: userInput.password,
-  });
-  if (!inputs.success) {
-    return res.status(411).json({ message: inputs.error });
-  }
-  try {
-    const userDoc = await User.create({
-      username: inputs.data.username,
-      password: bcrypt.hashSync(inputs.data.password, salt),
-    });
-    res.status(201).json(userDoc);
-  } catch (error) {
-    res.status(400).json(error);
-  }
-});
-
-app.post("/login", async (req, res) => {
-  const { userInput } = req.body;
-
-  const inputs = userInputs.safeParse({
-    username: userInput.username,
-    password: userInput.password,
-  });
-  if (!inputs.success) {
-    return res.status(411).json({ message: inputs.error });
-  }
-  try {
-    const userDoc = await User.findOne({ username: inputs.data.username });
-    if (userDoc) {
-      const passOk = bcrypt.compareSync(inputs.data.password, userDoc.password);
-      if (passOk) {
-        jwt.sign(
-          { username: inputs.data.username, id: userDoc._id },
-          SECRET,
-          {},
-          (err, token) => {
-            if (err) throw err;
-            res.cookie("token", token).json({
-              id: userDoc._id,
-              username: inputs.data.username,
-            });
-          }
-        );
-      } else {
-        res.status(401).json({ message: "wrong credentials" });
-      }
-    } else {
-      res.status(401).json({ message: "wrong user name" });
-    }
-  } catch (error) {
-    res.status(401).json(error);
-  }
-});
-
-app.get("/profile", (req, res) => {
-  const { token }: Token = req.cookies;
-  jwt.verify(token, SECRET, {}, (err, info) => {
-    if (err) throw err;
-    res.status(200).json(info);
-  });
-});
-
-app.post("/logout", (req, res) => {
-  res.cookie("token", " ").json("ok");
-});
 
 app.post("/post", uploadMiddleware.single("file"), async (req, res) => {
   const { originalname, path } = req.file || {};
