@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useRecoilValue } from "recoil";
 import { userEmailState, userIdState } from "../store/selectors/userDetails";
 import useLogout from "../hooks/useLogout";
@@ -9,6 +9,11 @@ const Header: React.FC = () => {
   const userName = useRecoilValue(userEmailState);
   const logout = useLogout();
   const userId = useRecoilValue(userIdState);
+
+  const { pathname } = useLocation();
+  const isActive = (path: string) => {
+    return path === pathname ? { color: "#9C9C9C" } : undefined;
+  };
 
   return (
     <header className="md:flex md:flex-row md:items-center md:justify-between flex flex-col items-start ">
@@ -65,6 +70,7 @@ const Header: React.FC = () => {
         <Link
           className="font-semibold border-b-2 border-transparent transition-all delay-100 pb-1 moveBorder hover:border-b-2 hover:border-black"
           to={"/"}
+          style={isActive("/")}
         >
           Home
         </Link>
@@ -72,6 +78,7 @@ const Header: React.FC = () => {
           <>
             <Link
               to="/create"
+              style={isActive("/create")}
               className="font-semibold border-b-2 border-transparent transition-all delay-100 pb-1 moveBorder hover:border-b-2 hover:border-black"
             >
               Create new Post
@@ -79,6 +86,7 @@ const Header: React.FC = () => {
             <div className="cursor-pointer flex flex-col gap-3 md:flex-row">
               <Link
                 to={`/user/${userId}`}
+                style={isActive(`/user/${userId}`)}
                 className="font-semibold border-b-2 border-transparent transition-all delay-100 pb-1 moveBorder hover:border-b-2 hover:border-black"
               >
                 {userName}
@@ -96,12 +104,14 @@ const Header: React.FC = () => {
           <>
             <Link
               to="/login"
+              style={isActive("/login")}
               className="font-semibold border-b-2 border-transparent transition-all delay-100 pb-1 moveBorder hover:border-b-2 hover:border-black"
             >
               Login
             </Link>
             <Link
               to="/register"
+              style={isActive("/register")}
               className="font-semibold border-b-2 border-transparent transition-all delay-100 pb-1 moveBorder hover:border-b-2 hover:border-black"
             >
               Register
