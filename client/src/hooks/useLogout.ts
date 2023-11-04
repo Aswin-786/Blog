@@ -9,7 +9,7 @@ const useLogout = () => {
   async function logout() {
     try {
       const res: AxiosResponse = await axios.post(
-        "http://localhost:4000/logout",
+        "http://localhost:4000/user/logout",
         {
           withCredentials: true,
         }
