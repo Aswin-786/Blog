@@ -9,7 +9,7 @@ const InitUser: React.FC = () => {
     const checkProfile = async () => {
       try {
         const res: AxiosResponse = await axios.get(
-          "http://localhost:4000/profile",
+          "http://localhost:4000/user/profile",
           {
             withCredentials: true,
           }
