@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import axios, { AxiosResponse } from "axios";
+import { BASE_URL } from "../shared/config";
 
 const usePost = () => {
   interface PostDetails {
@@ -18,7 +19,7 @@ const usePost = () => {
 
   const getPost = async () => {
     try {
-      const res: AxiosResponse = await axios.get("http://localhost:4000/post");
+      const res: AxiosResponse = await axios.get(`${BASE_URL}/post`);
       setPost(res.data);
     } catch (err) {
       setError(true);

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axios, { AxiosResponse } from "axios";
 import { useNavigate, useParams } from "react-router-dom";
+import { BASE_URL } from "../shared/config";
 
 const useSinglePost = () => {
   interface PostInfo {
@@ -22,9 +23,7 @@ const useSinglePost = () => {
 
   const getPost = async () => {
     try {
-      const res: AxiosResponse = await axios.get(
-        `http://localhost:4000/post/${id}`
-      );
+      const res: AxiosResponse = await axios.get(`${BASE_URL}/post/${id}`);
       if (res.status === 200) {
         setPostInfo(res.data);
       }
@@ -44,10 +43,7 @@ const useSinglePost = () => {
     };
 
   const deleteItem = async () => {
-    const res: AxiosResponse = await axios.delete(
-      `http://localhost:4000/post/${id}`,
-      {}
-    );
+    const res: AxiosResponse = await axios.delete(`${BASE_URL}/post/${id}`, {});
     if (res.status === 200) {
       navigate("/");
     }

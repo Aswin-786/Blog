@@ -1,6 +1,7 @@
 import React, { ChangeEvent, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import axios, { AxiosResponse } from "axios";
+import { BASE_URL } from "../shared/config";
 
 const useEditPost = () => {
   const { id } = useParams<{ id?: string }>();
@@ -12,9 +13,7 @@ const useEditPost = () => {
 
   const editPost = async () => {
     try {
-      const res: AxiosResponse = await axios.get(
-        `http://localhost:4000/post/${id}`
-      );
+      const res: AxiosResponse = await axios.get(`${BASE_URL}/post/${id}`);
       if (res.status === 200) {
         setTitle(res.data.title);
         setContent(res.data.content);
@@ -56,13 +55,12 @@ const useEditPost = () => {
       data.set("file", files?.[0]);
     }
 
-    const response: AxiosResponse = await axios.put(
-      `http://localhost:4000/post`,
-      data,
-      {
-        withCredentials: true,
-      }
-    );
+    const response: AxiosResponse = await axios.put(`${BASE_URL}/post`, data, {
+      headers: {
+        Authorization: "Bearer " + localStorage.getItem("token"),
+        "Content-Type": "multipart/form-data",
+      },
+    });
     if (response.status === 200) {
       navigate(`/post/${id}`);
     }

@@ -2,6 +2,7 @@ import { ChangeEvent, useState } from "react";
 import axios, { AxiosResponse } from "axios";
 import { useNavigate } from "react-router-dom";
 import { userInputParams } from "@aswin___786/common";
+import { BASE_URL } from "../shared/config";
 
 const useRegister = () => {
   const [username, setUsername] = useState<string>("");
@@ -24,7 +25,7 @@ const useRegister = () => {
 
     try {
       const response: AxiosResponse = await axios.post(
-        "http://localhost:4000/user/register",
+        `${BASE_URL}/user/register`,
         {
           userInput,
         },

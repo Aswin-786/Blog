@@ -4,6 +4,7 @@ import { userState } from "../store/atoms/User";
 import { useSetRecoilState } from "recoil";
 import axios from "axios";
 import { userInputParams } from "@aswin___786/common";
+import { BASE_URL } from "../shared/config";
 
 const useLogin = () => {
   const [username, setUsername] = useState<string>("");
@@ -26,7 +27,7 @@ const useLogin = () => {
     e.preventDefault();
     try {
       const response = await axios.post(
-        "http://localhost:4000/user/login",
+        `${BASE_URL}/user/login`,
         {
           userInput,
         },
@@ -43,6 +44,7 @@ const useLogin = () => {
           userName: response.data.username,
           userId: response.data.id,
         });
+        localStorage.setItem("token", response.data.token);
         navigate("/");
       } else {
         alert("Wrong credentials");

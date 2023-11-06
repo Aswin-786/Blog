@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { PostInputs, validateFile } from "@aswin___786/common";
 
 import axios from "axios";
+import { BASE_URL } from "../shared/config";
 
 const useCreatePost = () => {
   const [title, setTitle] = useState<string>("");
@@ -57,9 +58,9 @@ const useCreatePost = () => {
     }
 
     try {
-      await axios.post("http://localhost:4000/post", data, {
-        withCredentials: true,
+      await axios.post(`${BASE_URL}/post`, data, {
         headers: {
+          Authorization: "Bearer " + localStorage.getItem("token"),
           "Content-Type": "multipart/form-data",
         },
       });
