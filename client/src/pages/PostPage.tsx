@@ -8,6 +8,7 @@ import { useRecoilValue } from "recoil";
 import { userIdState } from "../store/selectors/userDetails";
 import useSinglePost from "../hooks/useSinglePost";
 import ErrorPage from "./ErrorPage";
+import { IMG_URL } from "../shared/config";
 
 const PostPage: React.FC = () => {
   const { error, deleteItem, postInfo } = useSinglePost();
@@ -56,10 +57,7 @@ const PostPage: React.FC = () => {
       <div className="flex items-center justify-center">
         <img
           className="md:h-[500px] h-[300px]"
-          src={
-            "https://zepjyypndjdibhvsxifk.supabase.co/storage/v1/object/public/share/" +
-            postInfo.cover
-          }
+          src={IMG_URL + postInfo.cover}
           alt=""
         />
       </div>
