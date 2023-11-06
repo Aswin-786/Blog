@@ -45,29 +45,33 @@ router.post("/", uploadMiddleware.single("file"), async (req, res) => {
     return res.status(500).json({ message: "File upload failed.", error });
   }
 
-  const { token }: Token = req.cookies;
-
-  jwt.verify(token, SECRET, {}, async (err, info) => {
-    if (err) throw err;
-    const postInputs = PostInputs.safeParse(req.body);
-    if (!postInputs.success) {
-      return res.status(411).json({ message: postInputs.error });
-    }
-    const title = postInputs.data.title;
-    const summary = postInputs.data.summary;
-    const content = postInputs.data.content;
-    if (!info) return res.status(401).json({ message: "error occurs in info" });
-    if (typeof info === "string")
-      return res.status(401).json({ message: "error occurs in info" });
-    const postDoc = await Post.create({
-      title,
-      summary,
-      content,
-      cover: newPath,
-      author: info.id,
+  // const { token }: Token = req.cookies;
+  const authHeader = req.headers.authorization;
+  if (authHeader) {
+    const token = authHeader.split(" ")[1];
+    jwt.verify(token, SECRET, {}, async (err, info) => {
+      if (err) throw err;
+      const postInputs = PostInputs.safeParse(req.body);
+      if (!postInputs.success) {
+        return res.status(411).json({ message: postInputs.error });
+      }
+      const title = postInputs.data.title;
+      const summary = postInputs.data.summary;
+      const content = postInputs.data.content;
+      if (!info)
+        return res.status(401).json({ message: "error occurs in info" });
+      if (typeof info === "string")
+        return res.status(401).json({ message: "error occurs in info" });
+      const postDoc = await Post.create({
+        title,
+        summary,
+        content,
+        cover: newPath,
+        author: info.id,
+      });
+      res.status(201).json(postDoc);
     });
-    res.status(201).json(postDoc);
-  });
+  }
 });
 
 router.get("/", async (req, res) => {
@@ -117,62 +121,69 @@ router.put(`/`, uploadMiddleware.single("file"), async (req, res) => {
         return res.status(500).json({ message: "File upload failed.", error });
       }
     }
-    const { token }: Token = req.cookies;
-    jwt.verify(token, SECRET, {}, async (err, info) => {
-      if (err) throw err;
-      if (!info)
-        return res.status(403).json({ message: "error occurs in info" });
-      if (typeof info === "string")
-        return res.status(403).json({ message: "error occurs in info" });
-      const postInputs = PostInputs.safeParse(req.body);
-      if (!postInputs.success) {
-        return res.status(411).json({ message: postInputs.error });
-      }
-      const title = postInputs.data.title;
-      const summary = postInputs.data.summary;
-      const content = postInputs.data.content;
-      const id = postInputs.data.id;
-      const postDoc = await Post.findById(id);
-      if (!postDoc?.cover) return res.status(403);
-      const isAuthor =
-        JSON.stringify(postDoc.author) === JSON.stringify(info.id);
-      if (!isAuthor) {
-        return res.status(401).json("wrong author");
-      }
-      if (newPath) {
-        const coverPath = postDoc.cover;
-        const imageName: string | undefined = coverPath
-          ? coverPath.split("\\").pop()
-          : undefined;
-
-        if (imageName === undefined) {
-          return res.status(500).json({ error: "Image name is undefined" });
+    // const { token }: Token = req.cookies;
+    const authHeader = req.headers.authorization;
+    if (authHeader) {
+      const token = authHeader.split(" ")[1];
+      jwt.verify(token, SECRET, {}, async (err, info) => {
+        if (err) throw err;
+        if (!info)
+          return res.status(403).json({ message: "error occurs in info" });
+        if (typeof info === "string")
+          return res.status(403).json({ message: "error occurs in info" });
+        const postInputs = PostInputs.safeParse(req.body);
+        if (!postInputs.success) {
+          return res.status(411).json({ message: postInputs.error });
         }
-
-        const { data, error } = await supabase.storage
-          .from("share")
-          .remove([`uploads/${imageName}`]);
-
-        if (error) {
-          return res
-            .status(500)
-            .json({ error: "Supabase image deletion failed", details: error });
+        const title = postInputs.data.title;
+        const summary = postInputs.data.summary;
+        const content = postInputs.data.content;
+        const id = postInputs.data.id;
+        const postDoc = await Post.findById(id);
+        if (!postDoc?.cover) return res.status(403);
+        const isAuthor =
+          JSON.stringify(postDoc.author) === JSON.stringify(info.id);
+        if (!isAuthor) {
+          return res.status(401).json("wrong author");
         }
-      }
-      const updatedCover = newPath ? newPath : postDoc.cover;
-      await Post.updateOne(
-        { _id: id, author: info.id },
-        {
-          $set: {
-            title,
-            summary,
-            content,
-            cover: updatedCover,
-          },
+        if (newPath) {
+          const coverPath = postDoc.cover;
+          const imageName: string | undefined = coverPath
+            ? coverPath.split("\\").pop()
+            : undefined;
+
+          if (imageName === undefined) {
+            return res.status(500).json({ error: "Image name is undefined" });
+          }
+
+          const { data, error } = await supabase.storage
+            .from("share")
+            .remove([`uploads/${imageName}`]);
+
+          if (error) {
+            return res
+              .status(500)
+              .json({
+                error: "Supabase image deletion failed",
+                details: error,
+              });
+          }
         }
-      );
-      res.json(postDoc);
-    });
+        const updatedCover = newPath ? newPath : postDoc.cover;
+        await Post.updateOne(
+          { _id: id, author: info.id },
+          {
+            $set: {
+              title,
+              summary,
+              content,
+              cover: updatedCover,
+            },
+          }
+        );
+        res.json(postDoc);
+      });
+    }
   } catch (error) {
     res.status(500).json(error);
   }

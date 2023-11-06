@@ -55,9 +55,14 @@ router.post("/login", async (req, res) => {
           {},
           (err, token) => {
             if (err) throw err;
-            res.cookie("token", token).json({
+            // res.cookie("token", token).json({
+            //   id: userDoc._id,
+            //   username: inputs.data.username,
+            // });
+            res.json({
               id: userDoc._id,
               username: inputs.data.username,
+              token,
             });
           }
         );
@@ -74,16 +79,20 @@ router.post("/login", async (req, res) => {
 
 // profile
 router.get("/profile", (req, res) => {
-  const { token }: Token = req.cookies;
-  jwt.verify(token, SECRET, {}, (err, info) => {
-    if (err) throw err;
-    res.status(200).json(info);
-  });
+  const authHeader = req.headers.authorization;
+  if (authHeader) {
+    const token = authHeader.split(" ")[1];
+    // const { token }: Token = req.cookies;
+    jwt.verify(token, SECRET, {}, (err, info) => {
+      if (err) throw err;
+      res.status(200).json({ info, token });
+    });
+  }
 });
 
 // logut
 router.post("/logout", (req, res) => {
-  res.cookie("token", " ").json("ok");
+  res.json("ok done");
 });
 
 // user Profile
