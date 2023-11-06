@@ -1,6 +1,7 @@
 import React from "react";
 import { format } from "date-fns";
 import { Link } from "react-router-dom";
+import { IMG_URL } from "../shared/config";
 
 interface PostProps {
   _id: string;
@@ -27,14 +28,7 @@ const Post: React.FC<PostProps> = ({
     <Link to={`/post/${_id}`}>
       <div className="post">
         <div className="image">
-          <img
-            className="rounded-l-md"
-            src={
-              "https://zepjyypndjdibhvsxifk.supabase.co/storage/v1/object/public/share/" +
-              cover
-            }
-            alt=""
-          />
+          <img className="rounded-l-md" src={IMG_URL + cover} alt="" />
         </div>
         <div className="text">
           <h2>{title}</h2>
