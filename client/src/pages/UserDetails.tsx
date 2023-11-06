@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useRecoilValue } from "recoil";
 import { userIdState } from "../store/selectors/userDetails";
+import { BASE_URL, IMG_URL } from "../shared/config";
 
 interface PostInfo {
   _id: string;
@@ -28,7 +29,7 @@ const UserDetails = () => {
   useEffect(() => {
     const getUser = async () => {
       try {
-        const res = await axios.get(`http://localhost:4000/user/${userId}`);
+        const res = await axios.get(`${BASE_URL}/user/${userId}`);
         if (res.status === 200) {
           setUser(res.data);
         }
@@ -40,7 +41,7 @@ const UserDetails = () => {
   }, []);
 
   async function deltePost(id: string) {
-    const res = await axios.delete(`http://localhost:4000/post/${id}`, {});
+    const res = await axios.delete(`${BASE_URL}/post/${id}`, {});
     if (res.status === 200) {
       navigate("/");
     }
@@ -82,10 +83,7 @@ const UserDetails = () => {
                 <Link to={`/post/${item._id}`}>
                   <div className="flex items-center  gap-4">
                     <img
-                      src={
-                        "https://zepjyypndjdibhvsxifk.supabase.co/storage/v1/object/public/share/" +
-                        item.cover
-                      }
+                      src={IMG_URL + item.cover}
                       className="w-[100px] h-[100px] rounded-l-md"
                       alt=""
                     />
