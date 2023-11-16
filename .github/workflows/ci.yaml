@@ -21,4 +21,4 @@ jobs:
           echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H ec2-51-20-95-84.eu-north-1.compute.amazonaws.com >> ~/.ssh/known_hosts
-          ssh -i ~/.ssh/id_rsa ubuntu@ec2-51-20-95-84.eu-north-1.compute.amazonaws.com "sudo bash ~/CI-CD/part-2-scripts/deploy.sh"
+          ssh -i ~/.ssh/id_rsa ubuntu@ec2-51-20-95-84.eu-north-1.compute.amazonaws.com "sudo bash ~/Blog/deploy/deploy.sh"
