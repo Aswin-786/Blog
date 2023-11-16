@@ -12,7 +12,9 @@ const app = express();
 const uploadsDirectory = path.join(__dirname, "../uploads");
 
 app.use(express.json());
-app.use(cors({ credentials: true, origin: "http://localhost:3000" }));
+app.use(
+  cors({ credentials: true, origin: "https://blognest.aswinkrishna.com" })
+);
 app.use(cookieParser());
 app.use("/user", userRouter);
 app.use("/post", postRouter);
@@ -26,7 +28,7 @@ if (!mongoUrl) {
 mongoose.connect(mongoUrl);
 
 app.get("/", (req, res) => {
-  res.status(200).json({ message: "hi to all checking ok ok" });
+  res.status(200).json({ message: "mice test" });
 });
 
 app.listen(4000, () => {
