@@ -27,8 +27,9 @@ if (!mongoUrl) {
 }
 mongoose.connect(mongoUrl);
 
-app.get('/',(req,res)=> {
-  res.status(200).json({message:'hihi'})
+app.get('/',(req,res) => {
+  res.status(200).json({message:'hi to all'})
+})
 
 app.listen(4000, () => {
   console.log("Server is running on port 4000");
