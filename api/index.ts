@@ -28,7 +28,7 @@ if (!mongoUrl) {
 mongoose.connect(mongoUrl);
 
 app.get("/", (req, res) => {
-  res.status(200).json({ message: "mice test 2" });
+  res.status(200).json({ message: "mice test 10" });
 });
 
 app.listen(4000, () => {
