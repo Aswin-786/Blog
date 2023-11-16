@@ -15,7 +15,9 @@ cd Blog
  git pull origin main
  git stash apply
  pm2 kill
- sudo chmod -R 777 /home/ubuntu/Blog/api
+#  sudo chmod -R 777 /home/ubuntu/Blog/api
  tsc
+ pm2 start dist/index.js
+ pm2 kill
  pm2 start dist/index.js
 
