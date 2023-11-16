@@ -10,13 +10,14 @@ cd Blog
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
  nvm install node
- npm i
  npm i -g pm2
  npm install -g typescript
  cd api
+ npm i
  git stash
  git pull origin main
  git stash apply
  pm2 kill
+ sudo chmod -R 777 /home/ubuntu/Blog/api
  tsc
  pm2 start dist/index.js
