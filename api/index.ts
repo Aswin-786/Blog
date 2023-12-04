@@ -13,7 +13,10 @@ const uploadsDirectory = path.join(__dirname, "../uploads");
 
 app.use(express.json());
 app.use(
-  cors({ credentials: true, origin: "https://blognest.aswinkrishna.com" })
+  cors({
+    credentials: true,
+    origin: ["https://blognest.aswinkrishna.com", "http://localhost:3000"],
+  })
 );
 app.use(cookieParser());
 app.use("/user", userRouter);
