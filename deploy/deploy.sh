@@ -18,6 +18,5 @@ cd Blog
 #  sudo chmod -R 777 /home/ubuntu/Blog/api
  tsc
  pm2 start dist/index.js
- pm2 kill
- pm2 start dist/index.js
+
 

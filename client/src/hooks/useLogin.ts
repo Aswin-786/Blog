@@ -27,7 +27,7 @@ const useLogin = () => {
     e.preventDefault();
     try {
       const response = await axios.post(
-        `${BASE_URL}/user/login`,
+        `http://localhost:4000/user/login`,
         {
           userInput,
         },
